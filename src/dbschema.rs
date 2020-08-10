@@ -24,6 +24,9 @@ pub async fn initdb<E: Executor>(db: &mut E) -> () {
         "drop table if exists cdataset",
         "drop index if exists loc_lookup_fips",
         "drop table if exists loc_lookup",
+        "drop table if exists covid19schema",
+        "create table covid19schema (version integer not null, minorversion integer not null)",
+        "insert into covid19schema values (1, 0)",
         // From Johns Hopkins UID_ISO_FIPS_LookUp_Table.csv
         // https://github.com/CSSEGISandData/COVID-19/blob/master/csse_covid_19_data/UID_ISO_FIPS_LookUp_Table.csv
         "create table loc_lookup (

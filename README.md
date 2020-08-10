@@ -6,6 +6,8 @@ https://www.cdc.gov/nchs/nvss/vsrr/covid_weekly/index.htm
 https://catalog.data.gov/dataset/covid-19-cases-summarized-by-age-group-and-gender
 https://aws.amazon.com/data-exchange/covid-19/?cards.sort-by=item.additionalFields.order&cards.sort-order=asc
 https://duckduckgo.com/?t=ffab&q=covid-19+data+set+by+age&ia=web
+https://rt.live/
+https://covidtracking.com/data/download
 
 In 2020, some counties in Kansas adopted a mask requirement while others didn't.  The Kansas Department of Health and Environment published a [chart](kdhe-chart.pdf) illustrating COVID-19 changes in masks vs. without counties.
 

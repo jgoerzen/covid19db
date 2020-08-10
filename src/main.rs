@@ -26,6 +26,7 @@ mod locparser;
 mod loclookuploader;
 mod parseutil;
 mod dbschema;
+mod combinedloader;
 
 /// Returns the first positional argument sent to this process. If there are no
 /// positional arguments, then this returns an error.
@@ -62,4 +63,10 @@ async fn main() {
     let inputpool = SqlitePool::builder()
         .max_size(5)
         .build(format!("sqlite::{}", input_path.into_string().unwrap()).as_ref()).await.expect("Error building");
+    combinedloader::load(&mut inputpool, &mut outputpool).await;
+
+    println!("Vacuuming");
+    conn.execute("VACUUM").await.unwrap();
+    println!("Optimizing");
+    conn.execute("PRAGMA OPTIMIZE").await.unwrap();
 }
