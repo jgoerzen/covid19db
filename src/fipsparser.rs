@@ -20,9 +20,6 @@ pub use crate::parseutil::*;
 use csv;
 use serde::Deserialize;
 use std::collections::HashMap;
-use std::fs::File;
-use std::path::Path;
-use std::error::Error;
 
 #[derive(Debug, Deserialize, PartialEq, Clone)]
 pub struct FipsRecord {

@@ -4,8 +4,14 @@ version = "0.1.0"
 authors = ["John Goerzen <jgoerzen@complete.org>"]
 edition = "2018"
 
+[[bin]]
+name = "covid19db-loader"
+path = "src/main.rs"
+
 [dependencies]
 csv = "1.1"
 serde = { version = "1", features = ["derive"] }
 chrono = "0.4"
 julianday = "0.2"
+sqlx = { version = "0.3", default-features = false, features = ["runtime-tokio", "macros", "sqlite", "chrono"] }
+tokio = { version = "0.2", features = ["macros"] }

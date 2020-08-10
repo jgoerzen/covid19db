@@ -19,6 +19,8 @@ Copyright (c) 2019-2020 John Goerzen
 use std::env;
 use std::error::Error;
 use std::ffi::OsString;
+use tokio::prelude::*;
+use sqlx::sqlite::SqlitePool;
 
 mod locparser;
 mod fipsparser;
@@ -28,11 +30,13 @@ mod parseutil;
 /// positional arguments, then this returns an error.
 fn get_nth_arg(arg: usize) -> Result<OsString, Box<dyn Error>> {
     match env::args_os().nth(arg) {
-        None => Err(From::from("expected argument, but got none; syntax: covid19db path-to-locations-diff.tsv")),
+        None => Err(From::from("expected argument, but got none; syntax: covid19db-loader path-to-csse_covid_19_data_UID_ISO_FIPS_LookUp_Table.csv path-to-locations-diff.tsv path-to-input-values-sqlite.db")),
         Some(file_path) => Ok(file_path),
     }
 }
-fn main() {
+
+#[tokio::main]
+async fn main() {
     let file_path = get_nth_arg(1)
         .expect("need args: path-to-fips.csv");
     let mut rdr = parseutil::parse_init_file(file_path).expect("Couldn't init parser");
@@ -42,4 +46,12 @@ fn main() {
         .expect("need args: path-to-locations-diff.tsv");
     let mut rdr = locparser::parse_init_file(file_path).expect("Couldn't init parser");
     let lochm = locparser::parse(fipshm, &mut rdr);
+
+    let input_path = get_nth_arg(3)
+        .expect("Need args: path to sqlite.db");
+    let inputpool = SqlitePool::builder()
+        .max_size(5)
+        .build(format!("sqlite::{}", input_path.into_string().unwrap()).as_ref()).await.expect("Error building");
+   
+
 }
