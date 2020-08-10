@@ -26,6 +26,7 @@ use crate::locparser::LocRec;
 use chrono::NaiveDate;
 use julianday::JulianDay;
 
+/// Calculates the absolute rate per 100k population in case it's not there
 fn set_per_pop(row: &sqlx::sqlite::SqliteRow, colname: &str, population: Option<i64>) -> Option<f64> {
     match row.get::<Option<f64>, &str>(format!("absolute_pop100k_{}", colname).as_str()) {
         Some(x) => Some(x),

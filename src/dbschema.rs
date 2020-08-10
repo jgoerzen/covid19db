@@ -17,6 +17,7 @@ Copyright (c) 2020 John Goerzen
 */
 
 use sqlx::prelude::*;
+use sqlx::{Query, Database};
 
 pub async fn initdb<E: Executor>(db: &mut E) -> () {
     let statements = vec![
@@ -110,5 +111,85 @@ pub async fn initdb<E: Executor>(db: &mut E) -> () {
 
     for statement in statements {
         db.execute(statement).await.expect("Error executing statement");
+    }
+}
+
+#[derive(PartialEq, Debug)]
+pub struct CDataSet {
+    // from the schema
+    // sed -e 's/ *\([^ ]*\)/pub \1:/' -e 's/integer not null/i64/' -e 's/text not null/String/' -e 's/text,/Option<String>,/' -e 's/real/f64/' -e 's/integer,/Option<i64>,/'
+pub dataset: String,
+pub data_key: String,
+pub location_key: String,
+pub location_type: String,
+pub location_label: String,
+pub country_code: Option<String>,
+pub country: Option<String>,
+pub province: Option<String>,
+pub administrative: Option<String>,
+pub region: Option<String>,
+pub subregion: Option<String>,
+pub location_lat: f64,
+pub location_long: f64,
+pub us_county_fips: Option<i64>,
+pub date: String,
+pub date_julian: i64,
+pub date_year: i64,
+pub date_month: i64,
+pub date_day: i64,
+pub day_index_0: i64,
+pub day_index_1: i64,
+pub day_index_10: Option<i64>,
+pub day_index_100: Option<i64>,
+pub day_index_1k: Option<i64>,
+pub day_index_10k: Option<i64>,
+pub day_index_peak: Option<i64>,
+pub day_index_peak_confirmed: Option<i64>,
+pub day_index_peak_deaths: Option<i64>,
+pub absolute_confirmed: i64,
+pub absolute_deaths: i64,
+pub absolute_recovered: i64,
+pub absolute_infected: i64,
+pub absolute_pop100k_confirmed: f64,
+pub absolute_pop100k_deaths: f64,
+pub absolute_pop100k_recovered: f64,
+pub absolute_pop100k_infected: f64,
+pub relative_deaths: f64,
+pub relative_recovered: f64,
+pub relative_infected: f64,
+pub delta_confirmed: i64,
+pub delta_deaths: i64,
+pub delta_recovered: i64,
+pub delta_infected: i64,
+pub delta_pct_confirmed: f64,
+pub delta_pct_deaths: f64,
+pub delta_pct_recovered: f64,
+pub delta_pct_infected: f64,
+pub delta_pop100k_confirmed: f64,
+pub delta_pop100k_deaths: f64,
+pub delta_pop100k_recovered: f64,
+pub delta_pop100k_infected: f64,
+pub peak_pct_confirmed: f64,
+pub peak_pct_deaths: f64,
+pub peak_pct_recovered: f64,
+pub peak_pct_infected: f64,
+pub factbook_area: f64,
+pub factbook_population: Option<i64>,
+pub factbook_death_rate: f64,
+pub factbook_median_age: f64,
+}
+
+impl CDataSet {
+    /// Bind all the parameters to a query.
+    pub fn bind_query<'q>(&self, query: Query<'q, sqlx::Sqlite>) -> Query<'q, sqlx::Sqlite> {
+        // from schema
+        // sed -e 's/ *\([^ ]*\).*/.bind(self.\1)/'
+        let ds = self.clone();
+        query
+    }
+
+    /// Gets an INSERT INTO string representing all the values in the table.
+    pub fn insert_str() -> String {
+        String::from("INSERT INTO cdataset VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
     }
 }
