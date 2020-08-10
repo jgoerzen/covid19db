@@ -21,6 +21,7 @@ use std::error::Error;
 use std::ffi::OsString;
 use tokio::prelude::*;
 use sqlx::sqlite::SqlitePool;
+use sqlx::prelude::*;
 
 mod locparser;
 mod loclookuploader;
@@ -40,7 +41,7 @@ fn get_nth_arg(arg: usize) -> Result<OsString, Box<dyn Error>> {
 #[tokio::main]
 async fn main() {
     println!("Initializing output database");
-    let outputpool = SqlitePool::builder()
+    let mut outputpool = SqlitePool::builder()
         .max_size(5)
         .build("sqlite::covid19.db").await.expect("Error building output sqlite");
     dbschema::initdb(&mut outputpool.acquire().await.unwrap()).await;
@@ -60,11 +61,12 @@ async fn main() {
     println!("Processing SQLITE data");
     let input_path = get_nth_arg(3)
         .expect("Need args: path to sqlite.db");
-    let inputpool = SqlitePool::builder()
+    let mut inputpool = SqlitePool::builder()
         .max_size(5)
         .build(format!("sqlite::{}", input_path.into_string().unwrap()).as_ref()).await.expect("Error building");
     combinedloader::load(&mut inputpool, &mut outputpool).await;
 
+    let mut conn = outputpool.acquire().await.unwrap();
     println!("Vacuuming");
     conn.execute("VACUUM").await.unwrap();
     println!("Optimizing");

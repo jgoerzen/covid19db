@@ -21,49 +21,30 @@ use std::collections::HashMap;
 use sqlx::prelude::*;
 use sqlx::Transaction;
 use std::convert::TryFrom;
-use mem::drop;
+use std::mem::drop;
 
 /** Parse the CSV, loading it into the database, and returning a hashmap of fips to population.
  * Will panic on parse error.  */
 pub async fn load(
-    inputpool: &mut Pool,
-    outputpool: &mut Pool) {
+    inputpool: &mut sqlx::SqlitePool,
+    outputpool: &mut sqlx::SqlitePool) {
 
     // Speed things up a bit.
-    let conn = outputpool.acquire().await.unwrap();
+    let mut conn = outputpool.acquire().await.unwrap();
     conn.execute("PRAGMA auto_vacuum = 0").await.unwrap();
     conn.execute("PRAGMA synchronous = 0").await.unwrap();
     drop(conn);
 
-    let transaction = outputpool.begin().await.unwrap();
+    let mut transaction = outputpool.begin().await.unwrap();
 
+    let mut iconn = inputpool.acquire().await.unwrap();
+    let mut cursor = sqlx::query("SELECT * from dataset ORDER BY dataset, location_key, date")
+        .fetch(&mut iconn);
 
-    let recs = parse_records(rdr.byte_records());
-    let finaliter = parse_to_final(recs);
-    let mut hm = HashMap::new();
-    for rec in finaliter {
-        match (rec.fips, rec.population) {
-            (Some(fipsi), Some(popi)) => {
-                hm.insert(fipsi, popi);
-            },
-            _ => ()
-        }
-        let query = sqlx::query("INSERT INTO loc_lookup VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-        query.bind(i64::from(rec.uid))
-             .bind(rec.iso2)
-             .bind(rec.iso3)
-             .bind(rec.code3.map(i64::from))
-             .bind(rec.fips.map(i64::from))
-             .bind(if rec.admin2.len() == 0 { None  } else {Some(rec.admin2)})
-             .bind(if rec.province_state.len() == 0 { None } else {Some(rec.province_state)})
-             .bind(rec.country_region)
-             .bind(rec.lat)
-             .bind(rec.lon)
-             .bind(rec.combined_key)
-             .bind(rec.population.map(|x| i64::try_from(x).expect("population range")))
-             .execute(&mut transaction).await.unwrap();
+    while let Some(row) = cursor.next().await.unwrap() {
+        let query = sqlx::query("INSERT INTO cdataset VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        query.bind(row.get::<i64, &str>("uid"))
+            .execute(&mut transaction).await.unwrap();
     }
     transaction.commit().await.unwrap();
-    hm
-
 }
