@@ -17,6 +17,7 @@ Copyright (c) 2020 John Goerzen
 */
 
 pub use crate::parseutil::*;
+use crate::dbschema::*;
 use std::collections::HashMap;
 use sqlx::prelude::*;
 use sqlx::Transaction;
@@ -81,66 +82,72 @@ fipshm: &HashMap<u32, u64>) {
 
 
        
-        let query = sqlx::query("INSERT INTO cdataset VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-        query.bind(row.get::<String, &str>("dataset"))
-             .bind(row.get::<String, &str>("data_key"))
-             .bind(row.get::<String, &str>("location_key"))
-             .bind(row.get::<String, &str>("location_type"))
-             .bind(row.get::<String, &str>("location_label"))
-             .bind(row.get::<Option<String>, &str>("country_code"))
-             .bind(row.get::<Option<String>, &str>("country"))
-             .bind(row.get::<Option<String>, &str>("province"))
-             .bind(row.get::<Option<String>, &str>("administrative"))
-             .bind(row.get::<Option<String>, &str>("region"))
-             .bind(row.get::<Option<String>, &str>("subregion"))
-             .bind(row.get::<Option<f64>, &str>("location_lat"))
-             .bind(row.get::<Option<f64>, &str>("location_long"))
-             .bind(fips.map(i64::from))
-             .bind(row.get::<String, &str>("date"))
-             .bind(julian)
-             .bind(row.get::<i64, &str>("date_year"))
-             .bind(row.get::<i64, &str>("date_month"))
-             .bind(row.get::<i64, &str>("date_day"))
-             .bind(row.get::<i64, &str>("day_index_0"))
-             .bind(row.get::<i64, &str>("day_index_1"))
-             .bind(row.get::<Option<i64>, &str>("day_index_10"))
-             .bind(row.get::<Option<i64>, &str>("day_index_100"))
-             .bind(row.get::<Option<i64>, &str>("day_index_1k"))
-             .bind(row.get::<Option<i64>, &str>("day_index_10k"))
-             .bind(row.get::<Option<i64>, &str>("day_index_peak"))
-             .bind(row.get::<Option<i64>, &str>("day_index_peak_confirmed"))
-             .bind(row.get::<Option<i64>, &str>("day_index_peak_deaths"))
-             .bind(row.get::<Option<i64>, &str>("absolute_confirmed").unwrap_or(0))
-             .bind(row.get::<Option<i64>, &str>("absolute_deaths").unwrap_or(0))
-             .bind(row.get::<Option<i64>, &str>("absolute_recovered").unwrap_or(0))
-             .bind(row.get::<Option<i64>, &str>("absolute_infected").unwrap_or(0))
-             .bind(set_per_pop(&row, "confirmed", population))
-             .bind(set_per_pop(&row, "deaths", population))
-             .bind(set_per_pop(&row, "recovered", population))
-             .bind(set_per_pop(&row, "infected", population))
-             .bind(row.get::<i64, &str>("relative_deaths"))
-             .bind(row.get::<i64, &str>("relative_recovered"))
-             .bind(row.get::<i64, &str>("relative_infected"))
-             .bind(row.get::<Option<i64>, &str>("delta_confirmed").unwrap_or(0))
-             .bind(row.get::<Option<i64>, &str>("delta_deaths").unwrap_or(0))
-             .bind(row.get::<Option<i64>, &str>("delta_recovered").unwrap_or(0))
-             .bind(row.get::<Option<i64>, &str>("delta_infected").unwrap_or(0))
-             .bind(row.get::<i64, &str>("delta_pct_confirmed"))
-             .bind(row.get::<i64, &str>("delta_pct_deaths"))
-             .bind(row.get::<i64, &str>("delta_pct_recovered"))
-             .bind(row.get::<i64, &str>("delta_pct_infected"))
-             .bind(row.get::<i64, &str>("delta_pop100k_confirmed"))
-             .bind(row.get::<i64, &str>("delta_pop100k_deaths"))
-             .bind(row.get::<i64, &str>("delta_pop100k_recovered"))
-             .bind(row.get::<i64, &str>("delta_pop100k_infected"))
-             .bind(row.get::<i64, &str>("peak_pct_confirmed"))
-             .bind(row.get::<i64, &str>("peak_pct_deaths"))
-             .bind(row.get::<i64, &str>("peak_pct_recovered"))
-             .bind(row.get::<i64, &str>("peak_pct_infected"))
-             .bind(row.get::<i64, &str>("factbook_area"))
-             .bind(population)
-             .bind(row.get::<i64, &str>("factbook_death_rate"))
-             .bind(row.get::<i64, &str>("factbook_median_age"))
+        let query = sqlx::query(CDataSet::insert_str());
+        let cds = CDataSet {
+
+
+dataset: row.get("dataset"),
+data_key: row.get("data_key"),
+location_key: row.get("location_key"),
+location_type: row.get("location_type"),
+location_label: row.get("location_label"),
+country_code: row.get("country_code"),
+country: row.get("country"),
+province: row.get("province"),
+administrative: row.get("administrative"),
+region: row.get("region"),
+subregion: row.get("subregion"),
+location_lat: row.get("location_lat"),
+location_long: row.get("location_long"),
+us_county_fips: fips.map(i64::from),
+date: row.get("date"),
+date_julian: i64::from(julian),
+date_year: row.get("date_year"),
+date_month: row.get("date_month"),
+date_day: row.get("date_day"),
+day_index_0: row.get("day_index_0"),
+day_index_1: row.get("day_index_1"),
+day_index_10: row.get("day_index_10"),
+day_index_100: row.get("day_index_100"),
+day_index_1k: row.get("day_index_1k"),
+day_index_10k: row.get("day_index_10k"),
+day_index_peak: row.get("day_index_peak"),
+day_index_peak_confirmed: row.get("day_index_peak_confirmed"),
+day_index_peak_deaths: row.get("day_index_peak_deaths"),
+absolute_confirmed: row.get::<Option<i64>, &str>("absolute_confirmed").unwrap_or(0),
+absolute_deaths: row.get::<Option<i64>, &str>("absolute_deaths").unwrap_or(0),
+absolute_recovered: row.get::<Option<i64>, &str>("absolute_recovered").unwrap_or(0),
+absolute_infected: row.get::<Option<i64>, &str>("absolute_infected").unwrap_or(0),
+absolute_pop100k_confirmed: set_per_pop(&row, "confirmed", population),
+absolute_pop100k_deaths: set_per_pop(&row, "deaths", population),
+absolute_pop100k_recovered: set_per_pop(&row, "recovered", population),
+absolute_pop100k_infected: set_per_pop(&row, "infected", population),
+relative_deaths: row.get("relative_deaths"),
+relative_recovered: row.get("relative_recovered"),
+relative_infected: row.get("relative_infected"),
+delta_confirmed: row.get::<Option<i64>, &str>("delta_confirmed").unwrap_or(0),
+delta_deaths: row.get::<Option<i64>, &str>("delta_deaths").unwrap_or(0),
+delta_recovered: row.get::<Option<i64>, &str>("delta_recovered").unwrap_or(0),
+delta_infected: row.get::<Option<i64>, &str>("delta_infected").unwrap_or(0),
+delta_pct_confirmed: row.get("delta_pct_confirmed"),
+delta_pct_deaths: row.get("delta_pct_deaths"),
+delta_pct_recovered: row.get("delta_pct_recovered"),
+delta_pct_infected: row.get("delta_pct_infected"),
+delta_pop100k_confirmed: row.get("delta_pop100k_confirmed"),
+delta_pop100k_deaths: row.get("delta_pop100k_deaths"),
+delta_pop100k_recovered: row.get("delta_pop100k_recovered"),
+delta_pop100k_infected: row.get("delta_pop100k_infected"),
+peak_pct_confirmed: row.get("peak_pct_confirmed"),
+peak_pct_deaths: row.get("peak_pct_deaths"),
+peak_pct_recovered: row.get("peak_pct_recovered"),
+peak_pct_infected: row.get("peak_pct_infected"),
+factbook_area: row.get("factbook_area"),
+factbook_population: population,
+factbook_death_rate: row.get("factbook_death_rate"),
+factbook_median_age: row.get("factbook_median_age"),
+        };
+
+        cds.bind_query(query)
             .execute(&mut transaction).await.unwrap();
         lastrow = Some(row);
     }
