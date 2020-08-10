@@ -20,6 +20,9 @@ pub use crate::parseutil::*;
 use csv;
 use serde::Deserialize;
 use std::collections::HashMap;
+use sqlx::prelude::*;
+use sqlx::Transaction;
+use std::convert::TryFrom;
 
 #[derive(Debug, Deserialize, PartialEq, Clone)]
 pub struct FipsRecord {
@@ -43,9 +46,11 @@ pub fn parse_to_final<A: Iterator<Item = csv::StringRecord>>(
     striter.filter_map(|x| rec_to_struct(&x).expect("rec_to_struct"))
 }
 
-/* Will panic on parse error.  */
-pub fn parse<'a, A: std::io::Read>(
+/** Parse the CSV, loading it into the database, and returning a hashmap of fips to population.
+ * Will panic on parse error.  */
+pub async fn load<'a, A: std::io::Read>(
     rdr: &'a mut csv::Reader<A>,
+    mut transaction: Transaction<sqlx::pool::PoolConnection<sqlx::SqliteConnection>>,
 ) -> HashMap<u32, u64> {
     let recs = parse_records(rdr.byte_records());
     let finaliter = parse_to_final(recs);
@@ -57,7 +62,22 @@ pub fn parse<'a, A: std::io::Read>(
             },
             _ => ()
         }
+        let query = sqlx::query("INSERT INTO loc_lookup VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        query.bind(i64::from(rec.uid))
+             .bind(rec.iso2)
+             .bind(rec.iso3)
+             .bind(rec.code3)
+             .bind(rec.fips.map(i64::from))
+             .bind(rec.admin2)
+             .bind(rec.province_state)
+             .bind(rec.country_region)
+             .bind(rec.lat)
+             .bind(rec.lon)
+             .bind(rec.combined_key)
+             .bind(rec.population.map(|x| i64::try_from(x).expect("population range")))
+             .execute(&mut transaction).await.unwrap();
     }
+    transaction.commit().await.unwrap();
     hm
 
 }

@@ -23,7 +23,7 @@ use tokio::prelude::*;
 use sqlx::sqlite::SqlitePool;
 
 mod locparser;
-mod fipsparser;
+mod loclookuploader;
 mod parseutil;
 mod dbschema;
 
@@ -44,11 +44,11 @@ async fn main() {
         .build("sqlite::covid19.db").await.expect("Error building output sqlite");
     dbschema::initdb(&mut outputpool.acquire().await.unwrap()).await;
 
-    println!("Processing FIPS map");
+    println!("Processing loc_lookup FIPS map");
     let file_path = get_nth_arg(1)
         .expect("need args: path-to-fips.csv");
     let mut rdr = parseutil::parse_init_file(file_path).expect("Couldn't init parser");
-    let fipshm = fipsparser::parse(&mut rdr);
+    let fipshm = loclookuploader::load(&mut rdr, outputpool.begin().await.unwrap()).await;
 
     println!("Processing location data");
     let file_path = get_nth_arg(2)

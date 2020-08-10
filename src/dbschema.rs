@@ -1,6 +1,6 @@
 /* Database schema
 
-Copyright (c) 2019-2020 John Goerzen
+Copyright (c) 2020 John Goerzen
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -20,8 +20,9 @@ use sqlx::prelude::*;
 
 pub async fn initdb<E: Executor>(db: &mut E) -> () {
     let statements = vec![
-        "drop table if exists cdataset",
         "drop index if exists cdataset_uniq_idx",
+        "drop table if exists cdataset",
+        "drop index if exists loc_lookup_fips",
         "drop table if exists loc_lookup",
         // From Johns Hopkins UID_ISO_FIPS_LookUp_Table.csv
         // https://github.com/CSSEGISandData/COVID-19/blob/master/csse_covid_19_data/UID_ISO_FIPS_LookUp_Table.csv
@@ -37,7 +38,8 @@ pub async fn initdb<E: Executor>(db: &mut E) -> () {
          latitude real,
          longitude real,
          combined_key text not null,
-         population integer not null)",
+         population integer)",
+        "create index loc_lookup_fips on loc_lookup (fips)",
        // From https://github.com/cipriancraciun/covid19-datasets/blob/master/exports/combined/v1/values-sqlite.db.gz
         "create table cdataset (
         dataset text not null,
