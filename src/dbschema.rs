@@ -330,6 +330,14 @@ impl CDataSet {
             delta_deaths: 0,
             delta_recovered: 0,
             delta_infected: 0,
+            delta_pct_confirmed: None,
+            delta_pct_deaths: None,
+            delta_pct_recovered: None,
+            delta_pct_infected: None,
+            delta_pop100k_confirmed: None,
+            delta_pop100k_deaths: None,
+            delta_pop100k_recovered: None,
+            delta_pop100k_infected: None,
             ..self
         }
     }
@@ -342,5 +350,6 @@ impl CDataSet {
         self.date_year = i64::from(nd.year());
         self.date_month = i64::from(nd.month());
         self.date_day = i64::from(nd.day());
+        self.data_key = format!("{}-{}", self.data_key, julian);
     }
 }

@@ -21,7 +21,6 @@ use sqlx::sqlite::SqlitePool;
 use std::env;
 use std::error::Error;
 use std::ffi::OsString;
-use tokio::prelude::*;
 
 mod combinedloader;
 mod dbschema;

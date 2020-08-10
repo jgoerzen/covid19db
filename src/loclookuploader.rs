@@ -19,7 +19,6 @@ Copyright (c) 2019-2020 John Goerzen
 pub use crate::parseutil::*;
 use csv;
 use serde::Deserialize;
-use sqlx::prelude::*;
 use sqlx::Transaction;
 use std::collections::HashMap;
 use std::convert::TryFrom;

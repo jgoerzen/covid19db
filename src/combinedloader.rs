@@ -45,6 +45,62 @@ fn set_per_pop(
     }
 }
 
+/// Fill up rows in which no changes occurred.
+async fn fillup(mut transaction: &mut Transaction<sqlx::pool::PoolConnection<sqlx::SqliteConnection>>,
+          lastrow: &Option<CDataSet>,
+          nextrow: Option<&CDataSet>,
+          prevdate: &NaiveDate, maxdate: &NaiveDate) {
+    // If there was no last row, nothing to do.
+    if let Some(lastrow) = lastrow {
+        let targetmaxdate = if let Some(nextrow) = nextrow {
+            if lastrow.dataset == nextrow.dataset && lastrow.location_key == nextrow.location_key {
+                // If the previous row was for the same location as this one, use the date
+                // immediately prior to this row's.
+                prevdate
+            } else {
+                // Different location - fill the previous row up to the maxdate.
+                maxdate
+            }
+        } else {
+            // when run at the very end, there will be no nextrow, so it'll just be maxdate then.
+            maxdate
+        };
+
+        // The +1 because we want to start AFTER the last row.
+        let mut thisjulian = JulianDay::new(i32::try_from(lastrow.date_julian).unwrap()).inner() + 1;
+        let maxjulian = JulianDay::from(*targetmaxdate).inner();
+        let mut add_days: i64 = 1;
+        while thisjulian <= maxjulian {
+            let query = sqlx::query(CDataSet::insert_str());
+            let mut cds = lastrow.clone().dup_day();
+            cds.set_date(i64::from(thisjulian));
+            cds.day_index_0 += add_days;
+            cds.day_index_1 += add_days;
+            cds.day_index_10 = cds.day_index_10.map(|x| x + add_days);
+            cds.day_index_100 = cds.day_index_100.map(|x| x + add_days);
+            cds.day_index_1k = cds.day_index_1k.map(|x| x + add_days);
+            cds.day_index_10k = cds.day_index_10k.map(|x| x + add_days);
+            cds.day_index_peak = cds.day_index_peak.map(|x| x + add_days);
+            cds.day_index_peak_confirmed = cds.day_index_peak_confirmed.map(|x| x + add_days);
+            cds.day_index_peak_deaths = cds.day_index_peak_deaths.map(|x| x + add_days);
+
+            /*
+            println!("fillup lastrow = {}, prevdate = {} {}, maxdate = {} {}, targetmaxdate = {}, maxjulian = {}: adding {}",
+                     lastrow.date_julian,
+                     prevdate, JulianDay::from(*prevdate).inner(), maxdate, JulianDay::from(*maxdate).inner(), targetmaxdate,
+                     maxjulian, cds.date_julian);
+            println!("{:?}", cds);
+            */
+            cds.bind_query(query)
+               .execute(&mut transaction)
+               .await
+               .unwrap();
+            thisjulian += 1;
+            add_days += 1;
+        }
+    }
+}
+
 /** Parse the CSV, loading it into the database, and returning a hashmap of fips to population.
  * Will panic on parse error.  */
 pub async fn load(
@@ -62,6 +118,9 @@ pub async fn load(
     let mut transaction = outputpool.begin().await.unwrap();
 
     let mut iconn = inputpool.acquire().await.unwrap();
+    let maxdate_str: (String, ) = sqlx::query_as("SELECT MAX(date) FROM dataset").fetch_one(&mut iconn).await.unwrap();
+    let maxdate = NaiveDate::parse_from_str(maxdate_str.0.as_str(), "%Y-%m-%d").unwrap();
+
     let mut cursor =
         sqlx::query("SELECT * from dataset ORDER BY dataset, location_key, date").fetch(&mut iconn);
 
@@ -75,12 +134,11 @@ pub async fn load(
             None
         };
 
-        let julian = JulianDay::from(NaiveDate::from_ymd(
+        let nd = NaiveDate::from_ymd(
             row.get("date_year"),
             u32::try_from(row.get::<i32, &str>("date_month")).unwrap(),
-            u32::try_from(row.get::<i32, &str>("date_day")).unwrap(),
-        ))
-        .inner();
+            u32::try_from(row.get::<i32, &str>("date_day")).unwrap());
+        let julian = JulianDay::from(nd).inner();
 
         let population: Option<i64> = match row.get("factbook_population") {
             Some(pop) => Some(pop),
@@ -90,6 +148,8 @@ pub async fn load(
                     .and_then(|y| Some(i64::try_from(*y).unwrap()))
             }),
         };
+
+
 
         let query = sqlx::query(CDataSet::insert_str());
         let cds = CDataSet {
@@ -160,11 +220,15 @@ pub async fn load(
             factbook_median_age: row.get("factbook_median_age"),
         };
 
+        fillup(&mut transaction, &lastrow, Some(&cds), &nd.pred(), &maxdate).await;
+        // println!("Adding {}", cds.date_julian);
+        // println!("{:?}", cds);
         cds.clone().bind_query(query)
             .execute(&mut transaction)
             .await
             .unwrap();
         lastrow = Some(cds);
     }
+    fillup(&mut transaction, &lastrow, None, &maxdate, &maxdate).await;
     transaction.commit().await.unwrap();
 }
