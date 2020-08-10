@@ -20,6 +20,9 @@ pub use crate::parseutil::*;
 use csv;
 use serde::Deserialize;
 use std::collections::HashMap;
+use std::fs::File;
+use std::path::Path;
+use std::error::Error;
 
 #[derive(Debug, Deserialize, PartialEq, Clone)]
 pub struct LocRecord {
@@ -48,6 +51,16 @@ pub fn parse_to_final<A: Iterator<Item = csv::StringRecord>>(
     striter: A,
 ) -> impl Iterator<Item = LocRecord> {
     striter.filter_map(|x| rec_to_struct(&x).expect("rec_to_struct"))
+}
+
+pub fn parse_init_file<P: AsRef<Path>>(filename: P) -> Result<csv::Reader<File>, Box<dyn Error>> {
+    let file = File::open(filename)?;
+    let rdr = csv::ReaderBuilder::new()
+        .delimiter(b'\t')
+        .double_quote(false)
+        .flexible(true)
+        .from_reader(file);
+    Ok(rdr)
 }
 
 /* Will panic on parse error.  */

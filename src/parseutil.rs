@@ -22,6 +22,7 @@ use std::error::Error;
 use std::fmt::Display;
 use std::fs::File;
 use std::str::FromStr;
+use std::path::Path;
 
 pub fn date_from_str<'de, S, D>(deserializer: D) -> Result<S, D::Error>
 where
@@ -39,11 +40,10 @@ pub fn rec_to_struct<'a, A: serde::Deserialize<'a>>(
     record.deserialize(None)
 }
 
-pub fn parse_init_file(filename: String) -> Result<csv::Reader<File>, Box<dyn Error>> {
+pub fn parse_init_file<P: AsRef<Path>>(filename: P) -> Result<csv::Reader<File>, Box<dyn Error>> {
     let file = File::open(filename)?;
     let rdr = csv::ReaderBuilder::new()
-        .delimiter(b'\t')
-        .double_quote(false)
+        .delimiter(b',')
         .flexible(true)
         .from_reader(file);
     Ok(rdr)

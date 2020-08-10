@@ -21,6 +21,7 @@ use std::error::Error;
 use std::ffi::OsString;
 
 mod locparser;
+mod fipsparser;
 mod parseutil;
 
 /// Returns the first positional argument sent to this process. If there are no
@@ -32,11 +33,14 @@ fn get_nth_arg(arg: usize) -> Result<OsString, Box<dyn Error>> {
     }
 }
 fn main() {
-    let loc_file_path = get_nth_arg(1)
-        .expect("need args: path-to-locations-diff.tsv")
-        .into_string()
-        .expect("conversion issue");
-    let mut locrdr = parseutil::parse_init_file(loc_file_path).expect("Couldn't init parser");
-    let lochm = locparser::parse(&mut locrdr);
+    let file_path = get_nth_arg(1)
+        .expect("need args: path-to-fips.csv");
+    let mut rdr = parseutil::parse_init_file(file_path).expect("Couldn't init parser");
+    let fipshm = fipsparser::parse(&mut rdr);
+
+    let file_path = get_nth_arg(1)
+        .expect("need args: path-to-locations-diff.tsv");
+    let mut rdr = locparser::parse_init_file(file_path).expect("Couldn't init parser");
+    let lochm = locparser::parse(&mut rdr);
 
 }
