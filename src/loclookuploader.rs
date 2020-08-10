@@ -29,7 +29,7 @@ pub struct FipsRecord {
     pub uid: u32,
     pub iso2: String,
     pub iso3: String,
-    pub code3: String,
+    pub code3: Option<u32>,
     pub fips: Option<u32>,
     pub admin2: String,
     pub province_state: String,
@@ -66,10 +66,10 @@ pub async fn load<'a, A: std::io::Read>(
         query.bind(i64::from(rec.uid))
              .bind(rec.iso2)
              .bind(rec.iso3)
-             .bind(rec.code3)
+             .bind(rec.code3.map(i64::from))
              .bind(rec.fips.map(i64::from))
-             .bind(rec.admin2)
-             .bind(rec.province_state)
+             .bind(if rec.admin2.len() == 0 { None  } else {Some(rec.admin2)})
+             .bind(if rec.province_state.len() == 0 { None } else {Some(rec.province_state)})
              .bind(rec.country_region)
              .bind(rec.lat)
              .bind(rec.lon)

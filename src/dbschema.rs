@@ -30,7 +30,7 @@ pub async fn initdb<E: Executor>(db: &mut E) -> () {
          uid integer not null primary key,
          iso2 text not null,
          iso3 text not null,
-         code3 text,
+         code3 integer,
          fips integer,
          admin2 text,
          province_state text,
