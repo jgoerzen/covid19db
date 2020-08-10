@@ -17,7 +17,10 @@ Copyright (c) 2020 John Goerzen
 */
 
 use sqlx::prelude::*;
-use sqlx::{Database, Query};
+use sqlx::Query;
+use julianday::JulianDay;
+use chrono::Datelike;
+use std::convert::TryFrom;
 
 pub async fn initdb<E: Executor>(db: &mut E) -> () {
     let statements = vec![
@@ -116,26 +119,26 @@ pub async fn initdb<E: Executor>(db: &mut E) -> () {
     }
 }
 
-#[derive(PartialEq, Debug, sqlx::FromRow)]
-pub struct CDataSet<'a> {
+#[derive(PartialEq, Clone, Debug, sqlx::FromRow)]
+pub struct CDataSet {
     // from the schema
-    // sed -e 's/ *\([^ ]*\)/pub \1:/' -e 's/integer not null/i64/' -e "s/text not null/\&'a str/" -e "s/text,/Option<\&'a str>,/" -e 's/real,/Option<f64>,/' -e 's/integer,/Option<i64>,/'
+    // sed -e 's/ *\([^ ]*\)/pub \1:/' -e 's/integer not null/i64/' -e "s/text not null/String/" -e "s/text,/Option<String>,/" -e 's/real,/Option<f64>,/' -e 's/integer,/Option<i64>,/'
     //
-    pub dataset: &'a str,
-    pub data_key: &'a str,
-    pub location_key: &'a str,
-    pub location_type: &'a str,
-    pub location_label: &'a str,
-    pub country_code: Option<&'a str>,
-    pub country: Option<&'a str>,
-    pub province: Option<&'a str>,
-    pub administrative: Option<&'a str>,
-    pub region: Option<&'a str>,
-    pub subregion: Option<&'a str>,
+    pub dataset: String,
+    pub data_key: String,
+    pub location_key: String,
+    pub location_type: String,
+    pub location_label: String,
+    pub country_code: Option<String>,
+    pub country: Option<String>,
+    pub province: Option<String>,
+    pub administrative: Option<String>,
+    pub region: Option<String>,
+    pub subregion: Option<String>,
     pub location_lat: Option<f64>,
     pub location_long: Option<f64>,
     pub us_county_fips: Option<i64>,
-    pub date: &'a str,
+    pub date: String,
     pub date_julian: i64,
     pub date_year: i64,
     pub date_month: i64,
@@ -182,9 +185,9 @@ pub struct CDataSet<'a> {
     pub factbook_median_age: Option<f64>,
 }
 
-impl<'a> CDataSet<'a> {
+impl CDataSet {
     /// Load from a row from a `select(*)`.  Probably want to use the `FromRow` derivation instead, really.
-    pub fn from_row<'c: 'a>(row: &sqlx::sqlite::SqliteRow<'c>) -> Self {
+    pub fn from_row<'c>(row: &sqlx::sqlite::SqliteRow<'c>) -> Self {
         // From the schema
         CDataSet {
             dataset: row.get("dataset"),
@@ -248,11 +251,11 @@ impl<'a> CDataSet<'a> {
             factbook_median_age: row.get("factbook_median_age"),
         }
     }
+
     /// Bind all the parameters to a query.
-    pub fn bind_query<'q>(&self, query: Query<'q, sqlx::Sqlite>) -> Query<'q, sqlx::Sqlite> {
+    pub fn bind_query<'q>(self, query: Query<'q, sqlx::Sqlite>) -> Query<'q, sqlx::Sqlite> {
         // from schema
         // sed -e 's/ *\([^ ]*\).*/.bind(self.\1)/'
-        let ds = self.clone();
         query
             .bind(self.dataset)
             .bind(self.data_key)
@@ -318,5 +321,26 @@ impl<'a> CDataSet<'a> {
     /// Gets an INSERT INTO string representing all the values in the table.
     pub fn insert_str() -> &'static str {
         "INSERT INTO cdataset VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+    }
+
+    /// Zeroes out the delta parameters so that this can reflect a duplicate day
+    pub fn dup_day(self) -> Self {
+        CDataSet {
+            delta_confirmed: 0,
+            delta_deaths: 0,
+            delta_recovered: 0,
+            delta_infected: 0,
+            ..self
+        }
+    }
+
+    pub fn set_date(&mut self, julian: i64) {
+        let jd = JulianDay::new(i32::try_from(julian).unwrap());
+        let nd = jd.to_date();
+        self.date_julian = i64::from(julian);
+        self.date = format!("{}", nd.format("%Y-%m-%d"));
+        self.date_year = i64::from(nd.year());
+        self.date_month = i64::from(nd.month());
+        self.date_day = i64::from(nd.day());
     }
 }

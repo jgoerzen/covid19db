@@ -160,7 +160,7 @@ pub async fn load(
             factbook_median_age: row.get("factbook_median_age"),
         };
 
-        cds.bind_query(query)
+        cds.clone().bind_query(query)
             .execute(&mut transaction)
             .await
             .unwrap();
