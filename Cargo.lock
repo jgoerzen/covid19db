@@ -32,7 +32,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "covid19ks"
+name = "covid19db"
 version = "0.1.0"
 dependencies = [
  "chrono 0.4.13 (registry+https://github.com/rust-lang/crates.io-index)",

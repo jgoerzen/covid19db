@@ -16,45 +16,52 @@ Copyright (c) 2019-2020 John Goerzen
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-use crate::arecord::ARecord;
 pub use crate::parseutil::*;
-use chrono;
-use chrono::naive::NaiveDate;
 use csv;
 use serde::Deserialize;
+use std::collections::HashMap;
 
 #[derive(Debug, Deserialize, PartialEq, Clone)]
-pub struct SrcRecord {
+pub struct LocRecord {
     pub key: String,
     pub key_original: String,
+    pub xtype: String,
+    pub label: String,
+    pub country_code: String,
+    pub country_different: String,
+    pub country_normalized: String,
+    pub country_original: String,
+    pub province_different: String,
+    pub province_normalized: String,
+    pub province_original: String,
+    pub administrative_different: String,
+    pub administrative_normalized: String,
+    pub administrative_origina: String,
+    pub region: String,
+    pub subregion: String,
+    pub us_state_code: String,
+    pub us_state_name: String,
     pub us_county_fips: Option<u32>,
-}
-
-/// Convert to (County, ARecord) tuple.
-pub fn struct_to_arecord(rec: Option<Record>) -> Option<ARecord> {
-    match rec {
-        Some(r) => Some(ARecord {
-            state: Some(r.state),
-            county: Some(r.county),
-            date: Some(r.date),
-            totalcases: r.cases,
-            totaldeaths: r.deaths,
-            ..ARecord::default()
-        }),
-        None => None,
-    }
 }
 
 pub fn parse_to_final<A: Iterator<Item = csv::StringRecord>>(
     striter: A,
-) -> impl Iterator<Item = ARecord> {
-    striter.filter_map(|x| struct_to_arecord(rec_to_struct(&x).expect("rec_to_struct")))
+) -> impl Iterator<Item = LocRecord> {
+    striter.filter_map(|x| rec_to_struct(&x).expect("rec_to_struct"))
 }
 
 /* Will panic on parse error.  */
 pub fn parse<'a, A: std::io::Read>(
     rdr: &'a mut csv::Reader<A>,
-) -> impl Iterator<Item = ARecord> + 'a {
+) -> HashMap<String, u32> {
     let recs = parse_records(rdr.byte_records());
-    parse_to_final(recs)
+    let finaliter = parse_to_final(recs);
+    let mut hm = HashMap::new();
+    for rec in finaliter {
+        if let Some(fips) = rec.us_county_fips {
+                hm.insert(rec.key, fips);
+        }
+    }
+    hm
+
 }

@@ -42,7 +42,8 @@ pub fn rec_to_struct<'a, A: serde::Deserialize<'a>>(
 pub fn parse_init_file(filename: String) -> Result<csv::Reader<File>, Box<dyn Error>> {
     let file = File::open(filename)?;
     let rdr = csv::ReaderBuilder::new()
-        .delimiter(b',')
+        .delimiter(b'\t')
+        .double_quote(false)
         .flexible(true)
         .from_reader(file);
     Ok(rdr)

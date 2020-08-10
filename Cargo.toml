@@ -1,5 +1,5 @@
 [package]
-name = "covid19ks"
+name = "covid19db"
 version = "0.1.0"
 authors = ["John Goerzen <jgoerzen@complete.org>"]
 edition = "2018"
