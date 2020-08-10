@@ -1,5 +1,12 @@
 # COVID-19 in Kansas: Masks vs. No-Masks
 
+https://source.opennews.org/articles/comparison-four-major-covid-19-data-sources/
+https://www.cdc.gov/nchs/nvss/vsrr/covid_weekly/index.htm
+https://www.cdc.gov/nchs/nvss/vsrr/covid_weekly/index.htm
+https://catalog.data.gov/dataset/covid-19-cases-summarized-by-age-group-and-gender
+https://aws.amazon.com/data-exchange/covid-19/?cards.sort-by=item.additionalFields.order&cards.sort-order=asc
+https://duckduckgo.com/?t=ffab&q=covid-19+data+set+by+age&ia=web
+
 In 2020, some counties in Kansas adopted a mask requirement while others didn't.  The Kansas Department of Health and Environment published a [chart](kdhe-chart.pdf) illustrating COVID-19 changes in masks vs. without counties.
 
 Some people questioned whether this chart was misleading due to its use of different Y-axis.  This repository produces a similar chart with a unified Y-axis and shows that the result was not misleading.  Here is the chart I generated:
