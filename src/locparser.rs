@@ -71,7 +71,7 @@ pub fn parse_init_file<P: AsRef<Path>>(filename: P) -> Result<csv::Reader<File>,
 
 /* Will panic on parse error.  */
 pub fn parse<'a, A: std::io::Read>(
-    fipshm: HashMap<u32, u64>,
+    fipshm: &HashMap<u32, u64>,
     rdr: &'a mut csv::Reader<A>,
 ) -> HashMap<String, LocRec> {
     let recs = parse_records(rdr.byte_records());

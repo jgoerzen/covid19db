@@ -56,7 +56,7 @@ async fn main() {
     let file_path = get_nth_arg(2)
         .expect("need args: path-to-locations-diff.tsv");
     let mut rdr = locparser::parse_init_file(file_path).expect("Couldn't init parser");
-    let lochm = locparser::parse(fipshm, &mut rdr);
+    let lochm = locparser::parse(&fipshm, &mut rdr);
 
     println!("Processing SQLITE data");
     let input_path = get_nth_arg(3)
@@ -64,7 +64,7 @@ async fn main() {
     let mut inputpool = SqlitePool::builder()
         .max_size(5)
         .build(format!("sqlite::{}", input_path.into_string().unwrap()).as_ref()).await.expect("Error building");
-    combinedloader::load(&mut inputpool, &mut outputpool).await;
+    combinedloader::load(&mut inputpool, &mut outputpool, &lochm, &fipshm).await;
 
     let mut conn = outputpool.acquire().await.unwrap();
     println!("Vacuuming");

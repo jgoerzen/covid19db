@@ -58,7 +58,7 @@ pub async fn initdb<E: Executor>(db: &mut E) -> () {
         subregion text,
         location_lat real,
         location_long real,
-        us_county_fips text,
+        us_county_fips integer,
         date text not null,
         date_julian integer not null,
         date_year integer not null,
