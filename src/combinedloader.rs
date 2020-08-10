@@ -164,7 +164,7 @@ pub async fn load(
             .execute(&mut transaction)
             .await
             .unwrap();
-        lastrow = Some(row);
+        lastrow = Some(cds);
     }
     transaction.commit().await.unwrap();
 }

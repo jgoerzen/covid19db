@@ -116,7 +116,7 @@ pub async fn initdb<E: Executor>(db: &mut E) -> () {
     }
 }
 
-#[derive(PartialEq, Debug)]
+#[derive(PartialEq, Debug, sqlx::FromRow)]
 pub struct CDataSet<'a> {
     // from the schema
     // sed -e 's/ *\([^ ]*\)/pub \1:/' -e 's/integer not null/i64/' -e "s/text not null/\&'a str/" -e "s/text,/Option<\&'a str>,/" -e 's/real,/Option<f64>,/' -e 's/integer,/Option<i64>,/'
@@ -183,7 +183,7 @@ pub struct CDataSet<'a> {
 }
 
 impl<'a> CDataSet<'a> {
-    /// Load from a row from a `select(*)`
+    /// Load from a row from a `select(*)`.  Probably want to use the `FromRow` derivation instead, really.
     pub fn from_row<'c: 'a>(row: &sqlx::sqlite::SqliteRow<'c>) -> Self {
         // From the schema
         CDataSet {
