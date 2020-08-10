@@ -24,19 +24,10 @@ use csv;
 use serde::Deserialize;
 
 #[derive(Debug, Deserialize, PartialEq, Clone)]
-pub struct Record {
-    #[serde(rename = "Date", deserialize_with = "crate::parseutil::date_from_str")]
-    pub date: NaiveDate,
-    #[serde(rename = "County")]
-    pub county: String,
-    #[serde(rename = "State")]
-    pub state: String,
-    #[serde(rename = "FIPS")]
-    pub fips: String,
-    #[serde(rename = "Cases")]
-    pub cases: i32,
-    #[serde(rename = "Deaths")]
-    pub deaths: i32,
+pub struct SrcRecord {
+    pub key: String,
+    pub key_original: String,
+    pub us_county_fips: Option<u32>,
 }
 
 /// Convert to (County, ARecord) tuple.
