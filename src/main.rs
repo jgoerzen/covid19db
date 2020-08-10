@@ -38,9 +38,8 @@ fn main() {
     let mut rdr = parseutil::parse_init_file(file_path).expect("Couldn't init parser");
     let fipshm = fipsparser::parse(&mut rdr);
 
-    let file_path = get_nth_arg(1)
+    let file_path = get_nth_arg(2)
         .expect("need args: path-to-locations-diff.tsv");
     let mut rdr = locparser::parse_init_file(file_path).expect("Couldn't init parser");
-    let lochm = locparser::parse(&mut rdr);
-
+    let lochm = locparser::parse(fipshm, &mut rdr);
 }

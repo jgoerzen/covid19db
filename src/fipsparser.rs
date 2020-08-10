@@ -25,62 +25,40 @@ use std::path::Path;
 use std::error::Error;
 
 #[derive(Debug, Deserialize, PartialEq, Clone)]
-pub struct LocRecord {
-    pub key: String,
-    pub key_original: String,
-    pub xtype: String,
-    pub label: String,
-    pub country_code: String,
-    pub country_different: String,
-    pub country_normalized: String,
-    pub country_original: String,
-    pub province_different: String,
-    pub province_normalized: String,
-    pub province_original: String,
-    pub administrative_different: String,
-    pub administrative_normalized: String,
-    pub administrative_origina: String,
-    pub region: String,
-    pub subregion: String,
-    pub us_state_code: String,
-    pub us_state_name: String,
-    pub us_county_fips: Option<u32>,
-}
-
-#[derive(Debug, Deserialize, PartialEq, Clone)]
-pub struct LocRec {
-    pub fips: u32,
+pub struct FipsRecord {
+    pub uid: String,
+    pub iso2: String,
+    pub iso3: String,
+    pub code3: String,
+    pub fips: Option<u32>,
+    pub admin2: String,
+    pub province_state: String,
+    pub country_region: String,
+    pub lat: String,
+    pub lon: String,
+    pub combined_key: String,
     pub population: Option<u64>,
 }
 
 pub fn parse_to_final<A: Iterator<Item = csv::StringRecord>>(
     striter: A,
-) -> impl Iterator<Item = LocRecord> {
+) -> impl Iterator<Item = FipsRecord> {
     striter.filter_map(|x| rec_to_struct(&x).expect("rec_to_struct"))
-}
-
-pub fn parse_init_file<P: AsRef<Path>>(filename: P) -> Result<csv::Reader<File>, Box<dyn Error>> {
-    let file = File::open(filename)?;
-    let rdr = csv::ReaderBuilder::new()
-        .delimiter(b'\t')
-        .double_quote(false)
-        .flexible(true)
-        .from_reader(file);
-    Ok(rdr)
 }
 
 /* Will panic on parse error.  */
 pub fn parse<'a, A: std::io::Read>(
-    fipshm: HashMap<u32, u64>,
     rdr: &'a mut csv::Reader<A>,
-) -> HashMap<String, LocRec> {
+) -> HashMap<u32, u64> {
     let recs = parse_records(rdr.byte_records());
     let finaliter = parse_to_final(recs);
     let mut hm = HashMap::new();
     for rec in finaliter {
-        if let Some(fips) = rec.us_county_fips {
-            hm.insert(rec.key, LocRec {fips,
-            population: fipshm.get(&fips).map(|x| *x)});
+        match (rec.fips, rec.population) {
+            (Some(fipsi), Some(popi)) => {
+                hm.insert(fipsi, popi);
+            },
+            _ => ()
         }
     }
     hm
