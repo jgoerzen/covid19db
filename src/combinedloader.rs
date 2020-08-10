@@ -26,6 +26,19 @@ use crate::locparser::LocRec;
 use chrono::NaiveDate;
 use julianday::JulianDay;
 
+fn set_per_pop(row: &sqlx::sqlite::SqliteRow, colname: &str, population: Option<i64>) -> Option<f64> {
+    match row.get::<Option<f64>, &str>(format!("absolute_pop100k_{}", colname).as_str()) {
+        Some(x) => Some(x),
+        None => match population {
+            None => None,
+            Some(pop) => {
+                Some((row.get::<i64, &str>(format!("absolute_{}", colname).as_str()) as f64)
+                     * 100000.0 / (pop as f64))
+            }
+        }
+    }
+}
+
 /** Parse the CSV, loading it into the database, and returning a hashmap of fips to population.
  * Will panic on parse error.  */
 pub async fn load(
@@ -46,8 +59,10 @@ fipshm: &HashMap<u32, u64>) {
     let mut cursor = sqlx::query("SELECT * from dataset ORDER BY dataset, location_key, date")
         .fetch(&mut iconn);
 
+    let mut lastrow = None;
+
     while let Some(row) = cursor.next().await.unwrap() {
-        let locrec = lochm.get(&row.get::<String, &str>("data_key"));
+        let locrec = lochm.get(&row.get::<String, &str>("location_key"));
         let fips = if let Some(loc) = locrec {
             Some(loc.fips)
         } else {
@@ -62,8 +77,10 @@ fipshm: &HashMap<u32, u64>) {
             Some(pop) => Some(pop),
             None => fips.and_then(|x| fipshm.get(&x).and_then(|y| Some(i64::try_from(*y).unwrap())))
         };
+
+
        
-        let query = sqlx::query("INSERT INTO cdataset VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        let query = sqlx::query("INSERT INTO cdataset VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
         query.bind(row.get::<String, &str>("dataset"))
              .bind(row.get::<String, &str>("data_key"))
              .bind(row.get::<String, &str>("location_key"))
@@ -71,6 +88,7 @@ fipshm: &HashMap<u32, u64>) {
              .bind(row.get::<String, &str>("location_label"))
              .bind(row.get::<Option<String>, &str>("country_code"))
              .bind(row.get::<Option<String>, &str>("country"))
+             .bind(row.get::<Option<String>, &str>("province"))
              .bind(row.get::<Option<String>, &str>("administrative"))
              .bind(row.get::<Option<String>, &str>("region"))
              .bind(row.get::<Option<String>, &str>("subregion"))
@@ -91,12 +109,39 @@ fipshm: &HashMap<u32, u64>) {
              .bind(row.get::<Option<i64>, &str>("day_index_peak"))
              .bind(row.get::<Option<i64>, &str>("day_index_peak_confirmed"))
              .bind(row.get::<Option<i64>, &str>("day_index_peak_deaths"))
-            .bind(row.get::<Option<i64>, &str>("absolute_confirmed").unwrap_or(0))
-
-
-
-
+             .bind(row.get::<Option<i64>, &str>("absolute_confirmed").unwrap_or(0))
+             .bind(row.get::<Option<i64>, &str>("absolute_deaths").unwrap_or(0))
+             .bind(row.get::<Option<i64>, &str>("absolute_recovered").unwrap_or(0))
+             .bind(row.get::<Option<i64>, &str>("absolute_infected").unwrap_or(0))
+             .bind(set_per_pop(&row, "confirmed", population))
+             .bind(set_per_pop(&row, "deaths", population))
+             .bind(set_per_pop(&row, "recovered", population))
+             .bind(set_per_pop(&row, "infected", population))
+             .bind(row.get::<i64, &str>("relative_deaths"))
+             .bind(row.get::<i64, &str>("relative_recovered"))
+             .bind(row.get::<i64, &str>("relative_infected"))
+             .bind(row.get::<Option<i64>, &str>("delta_confirmed").unwrap_or(0))
+             .bind(row.get::<Option<i64>, &str>("delta_deaths").unwrap_or(0))
+             .bind(row.get::<Option<i64>, &str>("delta_recovered").unwrap_or(0))
+             .bind(row.get::<Option<i64>, &str>("delta_infected").unwrap_or(0))
+             .bind(row.get::<i64, &str>("delta_pct_confirmed"))
+             .bind(row.get::<i64, &str>("delta_pct_deaths"))
+             .bind(row.get::<i64, &str>("delta_pct_recovered"))
+             .bind(row.get::<i64, &str>("delta_pct_infected"))
+             .bind(row.get::<i64, &str>("delta_pop100k_confirmed"))
+             .bind(row.get::<i64, &str>("delta_pop100k_deaths"))
+             .bind(row.get::<i64, &str>("delta_pop100k_recovered"))
+             .bind(row.get::<i64, &str>("delta_pop100k_infected"))
+             .bind(row.get::<i64, &str>("peak_pct_confirmed"))
+             .bind(row.get::<i64, &str>("peak_pct_deaths"))
+             .bind(row.get::<i64, &str>("peak_pct_recovered"))
+             .bind(row.get::<i64, &str>("peak_pct_infected"))
+             .bind(row.get::<i64, &str>("factbook_area"))
+             .bind(population)
+             .bind(row.get::<i64, &str>("factbook_death_rate"))
+             .bind(row.get::<i64, &str>("factbook_median_age"))
             .execute(&mut transaction).await.unwrap();
+        lastrow = Some(row);
     }
     transaction.commit().await.unwrap();
 }
