@@ -22,6 +22,23 @@ pub async fn initdb<E: Executor>(db: &mut E) -> () {
     let statements = vec![
         "drop table if exists cdataset",
         "drop index if exists cdataset_uniq_idx",
+        "drop table if exists loc_lookup",
+        // From Johns Hopkins UID_ISO_FIPS_LookUp_Table.csv
+        // https://github.com/CSSEGISandData/COVID-19/blob/master/csse_covid_19_data/UID_ISO_FIPS_LookUp_Table.csv
+        "create table loc_lookup (
+         uid integer not null primary key,
+         iso2 text not null,
+         iso3 text not null,
+         code3 text,
+         fips integer,
+         admin2 text,
+         province_state text,
+         country_region text not null,
+         latitude real,
+         longitude real,
+         combined_key text not null,
+         population integer not null)",
+       // From https://github.com/cipriancraciun/covid19-datasets/blob/master/exports/combined/v1/values-sqlite.db.gz
         "create table cdataset (
         dataset text not null,
         data_key text not null,
@@ -36,6 +53,7 @@ pub async fn initdb<E: Executor>(db: &mut E) -> () {
         subregion text,
         location_lat real,
         location_long real,
+        us_county_fips text,
         date text not null,
         date_julian integer not null,
         date_year integer not null,

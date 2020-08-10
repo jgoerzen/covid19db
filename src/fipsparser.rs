@@ -23,7 +23,7 @@ use std::collections::HashMap;
 
 #[derive(Debug, Deserialize, PartialEq, Clone)]
 pub struct FipsRecord {
-    pub uid: String,
+    pub uid: u32,
     pub iso2: String,
     pub iso3: String,
     pub code3: String,
@@ -31,8 +31,8 @@ pub struct FipsRecord {
     pub admin2: String,
     pub province_state: String,
     pub country_region: String,
-    pub lat: String,
-    pub lon: String,
+    pub lat: Option<f64>,
+    pub lon: Option<f64>,
     pub combined_key: String,
     pub population: Option<u64>,
 }
