@@ -16,18 +16,18 @@ Copyright (c) 2019-2020 John Goerzen
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+use sqlx::prelude::*;
+use sqlx::sqlite::SqlitePool;
 use std::env;
 use std::error::Error;
 use std::ffi::OsString;
 use tokio::prelude::*;
-use sqlx::sqlite::SqlitePool;
-use sqlx::prelude::*;
 
-mod locparser;
-mod loclookuploader;
-mod parseutil;
-mod dbschema;
 mod combinedloader;
+mod dbschema;
+mod loclookuploader;
+mod locparser;
+mod parseutil;
 
 /// Returns the first positional argument sent to this process. If there are no
 /// positional arguments, then this returns an error.
@@ -43,27 +43,28 @@ async fn main() {
     println!("Initializing output database");
     let mut outputpool = SqlitePool::builder()
         .max_size(5)
-        .build("sqlite::covid19.db").await.expect("Error building output sqlite");
+        .build("sqlite::covid19.db")
+        .await
+        .expect("Error building output sqlite");
     dbschema::initdb(&mut outputpool.acquire().await.unwrap()).await;
 
     println!("Processing loc_lookup FIPS map");
-    let file_path = get_nth_arg(1)
-        .expect("need args: path-to-fips.csv");
+    let file_path = get_nth_arg(1).expect("need args: path-to-fips.csv");
     let mut rdr = parseutil::parse_init_file(file_path).expect("Couldn't init parser");
     let fipshm = loclookuploader::load(&mut rdr, outputpool.begin().await.unwrap()).await;
 
     println!("Processing location data");
-    let file_path = get_nth_arg(2)
-        .expect("need args: path-to-locations-diff.tsv");
+    let file_path = get_nth_arg(2).expect("need args: path-to-locations-diff.tsv");
     let mut rdr = locparser::parse_init_file(file_path).expect("Couldn't init parser");
     let lochm = locparser::parse(&fipshm, &mut rdr);
 
     println!("Processing SQLITE data");
-    let input_path = get_nth_arg(3)
-        .expect("Need args: path to sqlite.db");
+    let input_path = get_nth_arg(3).expect("Need args: path to sqlite.db");
     let mut inputpool = SqlitePool::builder()
         .max_size(5)
-        .build(format!("sqlite::{}", input_path.into_string().unwrap()).as_ref()).await.expect("Error building");
+        .build(format!("sqlite::{}", input_path.into_string().unwrap()).as_ref())
+        .await
+        .expect("Error building");
     combinedloader::load(&mut inputpool, &mut outputpool, &lochm, &fipshm).await;
 
     let mut conn = outputpool.acquire().await.unwrap();

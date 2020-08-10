@@ -20,9 +20,9 @@ pub use crate::parseutil::*;
 use csv;
 use serde::Deserialize;
 use std::collections::HashMap;
+use std::error::Error;
 use std::fs::File;
 use std::path::Path;
-use std::error::Error;
 
 #[derive(Debug, Deserialize, PartialEq, Clone)]
 pub struct LocRecord {
@@ -79,10 +79,14 @@ pub fn parse<'a, A: std::io::Read>(
     let mut hm = HashMap::new();
     for rec in finaliter {
         if let Some(fips) = rec.us_county_fips {
-            hm.insert(rec.key, LocRec {fips,
-            population: fipshm.get(&fips).map(|x| *x)});
+            hm.insert(
+                rec.key,
+                LocRec {
+                    fips,
+                    population: fipshm.get(&fips).map(|x| *x),
+                },
+            );
         }
     }
     hm
-
 }

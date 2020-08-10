@@ -19,9 +19,9 @@ Copyright (c) 2019-2020 John Goerzen
 pub use crate::parseutil::*;
 use csv;
 use serde::Deserialize;
-use std::collections::HashMap;
 use sqlx::prelude::*;
 use sqlx::Transaction;
+use std::collections::HashMap;
 use std::convert::TryFrom;
 
 #[derive(Debug, Deserialize, PartialEq, Clone)]
@@ -59,25 +59,39 @@ pub async fn load<'a, A: std::io::Read>(
         match (rec.fips, rec.population) {
             (Some(fipsi), Some(popi)) => {
                 hm.insert(fipsi, popi);
-            },
-            _ => ()
+            }
+            _ => (),
         }
-        let query = sqlx::query("INSERT INTO loc_lookup VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-        query.bind(i64::from(rec.uid))
-             .bind(rec.iso2)
-             .bind(rec.iso3)
-             .bind(rec.code3.map(i64::from))
-             .bind(rec.fips.map(i64::from))
-             .bind(if rec.admin2.len() == 0 { None  } else {Some(rec.admin2)})
-             .bind(if rec.province_state.len() == 0 { None } else {Some(rec.province_state)})
-             .bind(rec.country_region)
-             .bind(rec.lat)
-             .bind(rec.lon)
-             .bind(rec.combined_key)
-             .bind(rec.population.map(|x| i64::try_from(x).expect("population range")))
-             .execute(&mut transaction).await.unwrap();
+        let query =
+            sqlx::query("INSERT INTO loc_lookup VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        query
+            .bind(i64::from(rec.uid))
+            .bind(rec.iso2)
+            .bind(rec.iso3)
+            .bind(rec.code3.map(i64::from))
+            .bind(rec.fips.map(i64::from))
+            .bind(if rec.admin2.len() == 0 {
+                None
+            } else {
+                Some(rec.admin2)
+            })
+            .bind(if rec.province_state.len() == 0 {
+                None
+            } else {
+                Some(rec.province_state)
+            })
+            .bind(rec.country_region)
+            .bind(rec.lat)
+            .bind(rec.lon)
+            .bind(rec.combined_key)
+            .bind(
+                rec.population
+                    .map(|x| i64::try_from(x).expect("population range")),
+            )
+            .execute(&mut transaction)
+            .await
+            .unwrap();
     }
     transaction.commit().await.unwrap();
     hm
-
 }
