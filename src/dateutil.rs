@@ -266,25 +266,58 @@ pub fn dateutc_to_day(dateutc: &Date<Utc>) -> i32 {
     nd_to_day(&dateutc_to_nd(dateutc))
 }
 
-/** Convert a `Date<Utc>` to a `JulianDay` */
+/** Convert a `Date<Utc>` to a `JulianDay`
+```
+use covid19db::dateutil::*;
+use chrono::prelude::*;
+use julianday::JulianDay;
+
+assert_eq!(dateutc_to_jd(&Utc.ymd(2015, 3, 14)), JulianDay::new(2457096));
+```
+*/
 #[allow(dead_code)]
 pub fn dateutc_to_jd(dateutc: &Date<Utc>) -> JulianDay {
     nd_to_jd(&dateutc_to_nd(dateutc))
 }
 
-/** Convert a `Date<Utc>` to (year, month, day) */
+/** Convert a `Date<Utc>` to (year, month, day)
+```
+use covid19db::dateutil::*;
+use chrono::prelude::*;
+use julianday::JulianDay;
+
+assert_eq!(dateutc_to_ymd(&Utc.ymd(2015, 3, 14)), (2015, 3, 14));
+```
+*/
 #[allow(dead_code)]
 pub fn dateutc_to_ymd(dateutc: &Date<Utc>) -> (i32, u32, u32) {
     nd_to_ymd(&dateutc_to_nd(dateutc))
 }
 
-/** Convert a `Date<Utc>` to a `Date<Local>` */
+/** Convert a `Date<Utc>` to a `Date<Local>`
+```
+use covid19db::dateutil::*;
+use chrono::prelude::*;
+use chrono::LocalResult;
+use julianday::JulianDay;
+
+assert_eq!(dateutc_to_datelocal(&Utc.ymd(2015, 3, 14)), LocalResult::Single(Local.ymd(2015, 3, 14)));
+```
+*/
 #[allow(dead_code)]
 pub fn dateutc_to_datelocal(dateutc: &Date<Utc>) -> LocalResult<Date<Local>> {
     Local.from_local_date(&dateutc_to_nd(dateutc))
 }
 
-/** Convert a `Date<Local>` to a `Date<Utc>` */
+/** Convert a `Date<Local>` to a `Date<Utc>`
+```
+use covid19db::dateutil::*;
+use chrono::prelude::*;
+use julianday::JulianDay;
+
+assert_eq!(datelocal_to_dateutc(&Local.ymd(2015, 3, 14)), Utc.ymd(2015, 3, 14));
+```
+*/
 #[allow(dead_code)]
 pub fn datelocal_to_dateutc(datelocal: &Date<Local>) -> Date<Utc> {
     Utc.from_utc_date(&datelocal.naive_local())
