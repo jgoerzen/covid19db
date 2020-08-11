@@ -16,31 +16,31 @@ Copyright (c) 2019-2020 John Goerzen
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-pub use crate::loader::parseutil::*;
-pub use crate::dbschema::*;
 pub use crate::dateutil::*;
+pub use crate::dbschema::*;
+pub use crate::loader::parseutil::*;
+use chrono::NaiveDate;
 use csv;
 use serde::Deserialize;
 use sqlx::Transaction;
-use chrono::NaiveDate;
 
 #[derive(Debug, Deserialize, PartialEq, Clone)]
 pub struct RTLiveRecord {
     pub date: String,
-pub state: String,
-pub rtindex: i64,
-pub mean: f64,
-pub median: f64,
-pub lower_80: f64,
-pub upper_80: f64,
-pub infections: f64,
-pub test_adjusted_positive: f64,
-pub test_adjusted_positive_raw: f64,
+    pub state: String,
+    pub rtindex: i64,
+    pub mean: f64,
+    pub median: f64,
+    pub lower_80: f64,
+    pub upper_80: f64,
+    pub infections: f64,
+    pub test_adjusted_positive: f64,
+    pub test_adjusted_positive_raw: f64,
     pub positive: f64,
-pub tests: f64,
-pub new_tests: Option<f64>,
-pub new_cases: Option<f64>,
-pub new_deaths: Option<f64>,
+    pub tests: f64,
+    pub new_tests: Option<f64>,
+    pub new_cases: Option<f64>,
+    pub new_deaths: Option<f64>,
 }
 
 pub fn parse_to_final<A: Iterator<Item = csv::StringRecord>>(
@@ -80,11 +80,10 @@ pub async fn load<'a, A: std::io::Read>(
             new_tests: rec.new_tests.map(|x| x.round() as i64),
             new_cases: rec.new_cases.map(|x| x.round() as i64),
             new_deaths: rec.new_deaths.map(|x| x.round() as i64),
-
         };
-        let query =
-            sqlx::query(RTLive::insert_str());
-        dbrec.bind_query(query)
+        let query = sqlx::query(RTLive::insert_str());
+        dbrec
+            .bind_query(query)
             .execute(&mut transaction)
             .await
             .unwrap();

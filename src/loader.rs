@@ -27,6 +27,7 @@ use tempfile::tempdir;
 
 use crate::dbschema;
 mod combinedloader;
+mod covid19trackingloader;
 mod loclookuploader;
 mod locparser;
 mod parseutil;
@@ -66,16 +67,32 @@ pub async fn load() {
     let mut rdr = parseutil::parse_init_file(csse_fips_file).expect("Couldn't init parser");
     let fipshm = loclookuploader::load(&mut rdr, outputpool.begin().await.unwrap()).await;
 
+    // covid19tracking
+
+    let path = tmp_path.join("covid19tracking.csv");
+    let mut file = stdoptions.open(&path).unwrap();
+    println!("Downloading {:#?}", path);
+    downloadto(
+        "https://d14wlfuexuxgcm.cloudfront.net/covid/rt.csv",
+        &mut file,
+    );
+    file.seek(SeekFrom::Start(0)).unwrap();
+    println!("Processing {:#?}", path);
+    let mut rdr = parseutil::parse_init_file(file).expect("Couldn't init parser");
+    covid19trackingloader::load(&mut rdr, outputpool.begin().await.unwrap()).await;
+
     // rt.live
 
-    let rt_path = tmp_path.join("rt.csv");
-    let mut rt_file = stdoptions.open(&rt_path).unwrap();
-    println!("Downloading {:#?}", rt_path);
-    downloadto("https://d14wlfuexuxgcm.cloudfront.net/covid/rt.csv",
-               &mut rt_file);
-    rt_file.seek(SeekFrom::Start(0)).unwrap();
-    println!("Processing {:#?}", rt_path);
-    let mut rdr = parseutil::parse_init_file(rt_file).expect("Couldn't init parser");
+    let path = tmp_path.join("rt.csv");
+    let mut file = stdoptions.open(&path).unwrap();
+    println!("Downloading {:#?}", path);
+    downloadto(
+        "https://d14wlfuexuxgcm.cloudfront.net/covid/rt.csv",
+        &mut file,
+    );
+    file.seek(SeekFrom::Start(0)).unwrap();
+    println!("Processing {:#?}", path);
+    let mut rdr = parseutil::parse_init_file(file).expect("Couldn't init parser");
     rtliveloader::load(&mut rdr, outputpool.begin().await.unwrap()).await;
 
     // Location map

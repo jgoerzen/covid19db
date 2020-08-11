@@ -19,10 +19,10 @@ Copyright (c) 2020 John Goerzen
 use sqlx::prelude::*;
 
 mod cdataset;
-mod rtlive;
 mod covid19tracking;
+mod rtlive;
 
-pub use crate::dbschema::{covid19tracking::*, cdataset::*, rtlive::*};
+pub use crate::dbschema::{cdataset::*, covid19tracking::*, rtlive::*};
 
 /** Initialize a database.  This will drop all indices and tables related to
 this project, then re-create them, thus emptying them and readying them to

@@ -20,60 +20,58 @@ Copyright (c) 2020 John Goerzen
 use crate::dateutil::*;
 use chrono::{Datelike, NaiveDate};
 use julianday::JulianDay;
-use serde::Deserialize;
 use sqlx::Query;
 use std::convert::TryFrom;
 
 /** The `Covid19Tracking` struct represents a row in the `covid19tracking` table.  It is an instance
 of `sqlx::FromRow` for the benefit of users of `sqlx::query_as`. */
-#[derive(PartialEq, Clone, Debug, sqlx::FromRow, Deserialize)]
+#[derive(PartialEq, Clone, Debug, sqlx::FromRow)]
 pub struct Covid19Tracking {
     pub date: String,
-pub date_julian: i32,
-pub date_year: i32,
-pub date_month: u32,
-pub date_day: u32,
-pub state: String,
-pub positive: Option<i64>,
-pub negative: Option<i64>,
-pub pending: Option<i64>,
-pub hospitalizedCurrently: Option<i64>,
-pub hospitalizedCumulative: Option<i64>,
-pub incluCurrently: Option<i64>,
-pub incluCumulative: Option<i64>,
-pub onVentilatorCurrently: Option<i64>,
-pub onVentilatorCumulative: Option<i64>,
-pub recovered: Option<i64>,
-pub dataQualityGrade: Option<String>,
-pub lastUpdateEt: Option<String>,
-pub dateModified: Option<String>,
-pub checkTimeEt: Option<String>,
-pub death: Option<i64>,
-pub hospitalized: Option<i64>,
-pub dateChecked: Option<i64>,
-pub totalTestsViral: Option<i64>,
-pub positiveTestsViral: Option<i64>,
-pub negativeTestsViral: Option<i64>,
-pub positiveCasesViral: Option<i64>,
-pub deathConfirmed: Option<i64>,
-pub deathProbable: Option<i64>,
-pub fips: i64,
-pub positiveIncrease: Option<i64>,
-pub negativeIncrease: Option<i64>,
-pub total: Option<i64>,
-pub totalTestResults: Option<i64>,
-pub totalTestResultsIncrease: Option<i64>,
-pub posNeg: Option<i64>,
-pub deathIncrease: Option<i64>,
-pub hospitalizedIncrease: Option<i64>,
-pub hash: Option<String>,
-pub commercialScore: Option<i64>,
-pub negativeRegularScore: Option<i64>,
-pub negativeScore: Option<i64>,
-pub positiveScore: Option<i64>,
-pub score: Option<i64>,
-pub grade: Option<String>,
-
+    pub date_julian: i32,
+    pub date_year: i32,
+    pub date_month: u32,
+    pub date_day: u32,
+    pub state: String,
+    pub positive: Option<i64>,
+    pub negative: Option<i64>,
+    pub pending: Option<i64>,
+    pub hospitalizedCurrently: Option<i64>,
+    pub hospitalizedCumulative: Option<i64>,
+    pub incluCurrently: Option<i64>,
+    pub incluCumulative: Option<i64>,
+    pub onVentilatorCurrently: Option<i64>,
+    pub onVentilatorCumulative: Option<i64>,
+    pub recovered: Option<i64>,
+    pub dataQualityGrade: Option<String>,
+    pub lastUpdateEt: Option<String>,
+    pub dateModified: Option<String>,
+    pub checkTimeEt: Option<String>,
+    pub death: Option<i64>,
+    pub hospitalized: Option<i64>,
+    pub dateChecked: Option<i64>,
+    pub totalTestsViral: Option<i64>,
+    pub positiveTestsViral: Option<i64>,
+    pub negativeTestsViral: Option<i64>,
+    pub positiveCasesViral: Option<i64>,
+    pub deathConfirmed: Option<i64>,
+    pub deathProbable: Option<i64>,
+    pub fips: i64,
+    pub positiveIncrease: Option<i64>,
+    pub negativeIncrease: Option<i64>,
+    pub total: Option<i64>,
+    pub totalTestResults: Option<i64>,
+    pub totalTestResultsIncrease: Option<i64>,
+    pub posNeg: Option<i64>,
+    pub deathIncrease: Option<i64>,
+    pub hospitalizedIncrease: Option<i64>,
+    pub hash: Option<String>,
+    pub commercialScore: Option<i64>,
+    pub negativeRegularScore: Option<i64>,
+    pub negativeScore: Option<i64>,
+    pub positiveScore: Option<i64>,
+    pub score: Option<i64>,
+    pub grade: Option<String>,
 }
 
 impl Covid19Tracking {
@@ -82,51 +80,51 @@ impl Covid19Tracking {
         // from schema
         // sed -e 's/ *\([^ ]*\).*/.bind(self.\1)/'
         query
-.bind(self.date)
-.bind(self.date_julian)
-.bind(self.date_year)
+            .bind(self.date)
+            .bind(self.date_julian)
+            .bind(self.date_year)
             .bind(i32::try_from(self.date_month).unwrap())
             .bind(i32::try_from(self.date_day).unwrap())
-.bind(self.state)
-.bind(self.positive)
-.bind(self.negative)
-.bind(self.pending)
-.bind(self.hospitalizedCurrently)
-.bind(self.hospitalizedCumulative)
-.bind(self.incluCurrently)
-.bind(self.incluCumulative)
-.bind(self.onVentilatorCurrently)
-.bind(self.onVentilatorCumulative)
-.bind(self.recovered)
-.bind(self.dataQualityGrade)
-.bind(self.lastUpdateEt)
-.bind(self.dateModified)
-.bind(self.checkTimeEt)
-.bind(self.death)
-.bind(self.hospitalized)
-.bind(self.dateChecked)
-.bind(self.totalTestsViral)
-.bind(self.positiveTestsViral)
-.bind(self.negativeTestsViral)
-.bind(self.positiveCasesViral)
-.bind(self.deathConfirmed)
-.bind(self.deathProbable)
-.bind(self.fips)
-.bind(self.positiveIncrease)
-.bind(self.negativeIncrease)
-.bind(self.total)
-.bind(self.totalTestResults)
-.bind(self.totalTestResultsIncrease)
-.bind(self.posNeg)
-.bind(self.deathIncrease)
-.bind(self.hospitalizedIncrease)
-.bind(self.hash)
-.bind(self.commercialScore)
-.bind(self.negativeRegularScore)
-.bind(self.negativeScore)
-.bind(self.positiveScore)
-.bind(self.score)
-.bind(self.grade)
+            .bind(self.state)
+            .bind(self.positive)
+            .bind(self.negative)
+            .bind(self.pending)
+            .bind(self.hospitalizedCurrently)
+            .bind(self.hospitalizedCumulative)
+            .bind(self.incluCurrently)
+            .bind(self.incluCumulative)
+            .bind(self.onVentilatorCurrently)
+            .bind(self.onVentilatorCumulative)
+            .bind(self.recovered)
+            .bind(self.dataQualityGrade)
+            .bind(self.lastUpdateEt)
+            .bind(self.dateModified)
+            .bind(self.checkTimeEt)
+            .bind(self.death)
+            .bind(self.hospitalized)
+            .bind(self.dateChecked)
+            .bind(self.totalTestsViral)
+            .bind(self.positiveTestsViral)
+            .bind(self.negativeTestsViral)
+            .bind(self.positiveCasesViral)
+            .bind(self.deathConfirmed)
+            .bind(self.deathProbable)
+            .bind(self.fips)
+            .bind(self.positiveIncrease)
+            .bind(self.negativeIncrease)
+            .bind(self.total)
+            .bind(self.totalTestResults)
+            .bind(self.totalTestResultsIncrease)
+            .bind(self.posNeg)
+            .bind(self.deathIncrease)
+            .bind(self.hospitalizedIncrease)
+            .bind(self.hash)
+            .bind(self.commercialScore)
+            .bind(self.negativeRegularScore)
+            .bind(self.negativeScore)
+            .bind(self.positiveScore)
+            .bind(self.score)
+            .bind(self.grade)
     }
 
     /// Gets an INSERT INTO string representing all the values in the table.

@@ -19,13 +19,12 @@ Copyright (c) 2020 John Goerzen
 use crate::dateutil::*;
 use chrono::{Datelike, NaiveDate};
 use julianday::JulianDay;
-use serde::Deserialize;
 use sqlx::Query;
 use std::convert::TryFrom;
 
 /** The `RTLive` struct represents a row in the `rtlive` table.  It is an instance
 of `sqlx::FromRow` for the benefit of users of `sqlx::query_as`. */
-#[derive(PartialEq, Clone, Debug, sqlx::FromRow, Deserialize)]
+#[derive(PartialEq, Clone, Debug, sqlx::FromRow)]
 pub struct RTLive {
     pub date: String,
     pub date_julian: i32,
