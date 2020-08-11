@@ -73,13 +73,13 @@ async fn fillup(
 
         // The +1 because we want to start AFTER the last row.
         let mut thisjulian =
-            JulianDay::new(i32::try_from(lastrow.date_julian).unwrap()).inner() + 1;
+            JulianDay::new(lastrow.date_julian).inner() + 1;
         let maxjulian = JulianDay::from(*targetmaxdate).inner();
-        let mut add_days: i64 = 1;
+        let mut add_days: i32 = 1;
         while thisjulian <= maxjulian {
             let query = sqlx::query(CDataSet::insert_str());
             let mut cds = lastrow.clone().dup_day();
-            cds.set_date(i64::from(thisjulian));
+            cds.set_date(thisjulian);
             cds.day_index_0 += add_days;
             cds.day_index_1 += add_days;
             cds.day_index_10 = cds.day_index_10.map(|x| x + add_days);
@@ -182,7 +182,7 @@ pub async fn load(
             location_long: row.get("location_long"),
             us_county_fips: fips.map(i64::from),
             date: row.get("date"),
-            date_julian: i64::from(julian),
+            date_julian: julian,
             date_year: row.get("date_year"),
             date_month: row.get("date_month"),
             date_day: row.get("date_day"),

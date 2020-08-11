@@ -20,7 +20,7 @@ use chrono::{Datelike, NaiveDate};
 use julianday::JulianDay;
 use sqlx::prelude::*;
 use sqlx::Query;
-use std::convert::TryFrom;
+use std::convert::TryInto;
 
 /** Initialize a database.  This will drop all indices and tables related to
 this project, then re-create them, thus emptying them and readying them to
@@ -144,19 +144,19 @@ pub struct CDataSet {
     pub location_long: Option<f64>,
     pub us_county_fips: Option<i64>,
     pub date: String,
-    pub date_julian: i64,
-    pub date_year: i64,
-    pub date_month: i64,
-    pub date_day: i64,
-    pub day_index_0: i64,
-    pub day_index_1: i64,
-    pub day_index_10: Option<i64>,
-    pub day_index_100: Option<i64>,
-    pub day_index_1k: Option<i64>,
-    pub day_index_10k: Option<i64>,
-    pub day_index_peak: Option<i64>,
-    pub day_index_peak_confirmed: Option<i64>,
-    pub day_index_peak_deaths: Option<i64>,
+    pub date_julian: i32,
+    pub date_year: i32,
+    pub date_month: i32,
+    pub date_day: i32,
+    pub day_index_0: i32,
+    pub day_index_1: i32,
+    pub day_index_10: Option<i32>,
+    pub day_index_100: Option<i32>,
+    pub day_index_1k: Option<i32>,
+    pub day_index_10k: Option<i32>,
+    pub day_index_peak: Option<i32>,
+    pub day_index_peak_confirmed: Option<i32>,
+    pub day_index_peak_deaths: Option<i32>,
     pub absolute_confirmed: i64,
     pub absolute_deaths: i64,
     pub absolute_recovered: i64,
@@ -349,21 +349,21 @@ impl CDataSet {
 
     /// Sets all date fields in the struct to appropriate representations of the
     /// given Julian date.
-    pub fn set_date(&mut self, julian: i64) {
-        let jd = JulianDay::new(i32::try_from(julian).unwrap());
+    pub fn set_date(&mut self, julian: i32) {
+        let jd = JulianDay::new(julian);
         let nd = jd.to_date();
-        self.date_julian = i64::from(julian);
+        self.date_julian = julian;
         self.date = format!("{}", nd.format("%Y-%m-%d"));
-        self.date_year = i64::from(nd.year());
-        self.date_month = i64::from(nd.month());
-        self.date_day = i64::from(nd.day());
+        self.date_year = nd.year();
+        self.date_month = nd.month().try_into().unwrap();
+        self.date_day = nd.day().try_into().unwrap();
         self.data_key = format!("{}-{}", self.data_key, julian);
     }
 
     /// Sets all date fields in the struct to the appropriate representation of
     /// the given `JulianDay`.
     pub fn set_date_julianday(&mut self, jd: &JulianDay) {
-        self.set_date(i64::from(jd.clone().inner()));
+        self.set_date(jd.clone().inner());
     }
 
     /// Sets all date fields in the struct to the appropriate representation of
