@@ -1,4 +1,4 @@
-name: build
+name: test
 
 on:
   push:
@@ -18,30 +18,5 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-#    - name: Build
-#      run: cargo build --verbose
-#    - name: Run tests
-#      run: cargo test --verbose
-    - name: Execute
-      run: cargo run --release
-    - name: Compress
-      run: zip -9 covid19db.zip covid19.db
-#    - name: Create Release
-#      id: create_release
-#      uses: actions/create-release@v1
-#      env:
-#        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#      with:
-#        tag_name: ${{ github.ref }}
-#        release_name: Release ${{ github.ref }}
-#        draft: false
-#        prerelease: false
-    - name: Upload binaries to release
-      uses: svenstaro/upload-release-action@v2
-      with:
-        repo_token: ${{ secrets.GITHUB_TOKEN }}
-        file: covid19db.zip
-        asset_name: covid19db.zip
-        tag: "v0.1.0"
-        overwrite: true
-        body: "Latest database build"
+    - name: Run tests
+      run: cargo test --verbose
