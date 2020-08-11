@@ -3,10 +3,19 @@ name = "covid19db"
 version = "0.1.0"
 authors = ["John Goerzen <jgoerzen@complete.org>"]
 edition = "2018"
+license = "GPL-3.0+"
+description = "Utility for building and accessing COVID-19 datasets"
+homepage = "https://github.com/jgoerzen/covid19db"
+repository = "https://github.com/jgoerzen/covid19db/"
+readme = "README.md"
+keywords = ["covid19", "covid-19", "database", "coronavirus"]
+categories = ["command-line-utilities", "database", "science"]
 
 [[bin]]
 name = "covid19db-loader"
 path = "src/main.rs"
+
+[lib]
 
 [dependencies]
 csv = "1.1"
