@@ -21,6 +21,7 @@ use julianday::JulianDay;
 use sqlx::prelude::*;
 use sqlx::Query;
 use std::convert::TryInto;
+use crate::dateutil::*;
 
 /** The `CDataSet` struct represents a row in the `cdataset` table.  It is an instance
 of `sqlx::FromRow` for the benefit of users of `sqlx::query_as`. */
@@ -265,13 +266,13 @@ impl CDataSet {
     /// Sets all date fields in the struct to the appropriate representation of
     /// the given `JulianDay`.
     pub fn set_date_julianday(&mut self, jd: &JulianDay) {
-        self.set_date(jd.clone().inner());
+        self.set_date(jd_to_day(jd));
     }
 
     #[allow(dead_code)]
     /// Sets all date fields in the struct to the appropriate representation of
     /// the given `NaiveDate` from the `chrono` package.
     pub fn set_date_naivedate(&mut self, nd: &NaiveDate) {
-        self.set_date_julianday(&JulianDay::from(*nd));
+        self.set_date(nd_to_day(nd));
     }
 }
