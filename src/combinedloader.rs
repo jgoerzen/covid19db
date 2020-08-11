@@ -20,7 +20,6 @@ use crate::dbschema::*;
 use crate::locparser::LocRec;
 pub use crate::parseutil::*;
 use chrono::NaiveDate;
-use julianday::JulianDay;
 use sqlx::prelude::*;
 use sqlx::Transaction;
 use std::collections::HashMap;
@@ -28,6 +27,7 @@ use std::convert::TryFrom;
 use std::io;
 use std::io::Write;
 use std::mem::drop;
+use crate::dateutil::*;
 
 /// Calculates the absolute rate per 100k population in case it's not there
 fn set_per_pop(
@@ -72,9 +72,8 @@ async fn fillup(
         };
 
         // The +1 because we want to start AFTER the last row.
-        let mut thisjulian =
-            JulianDay::new(lastrow.date_julian).inner() + 1;
-        let maxjulian = JulianDay::from(*targetmaxdate).inner();
+        let mut thisjulian = lastrow.date_julian + 1;
+        let maxjulian = nd_to_day(targetmaxdate);
         let mut add_days: i32 = 1;
         while thisjulian <= maxjulian {
             let query = sqlx::query(CDataSet::insert_str());
@@ -154,7 +153,7 @@ pub async fn load(
             u32::try_from(row.get::<i32, &str>("date_month")).unwrap(),
             u32::try_from(row.get::<i32, &str>("date_day")).unwrap(),
         );
-        let julian = JulianDay::from(nd).inner();
+        let julian = nd_to_day(&nd);
 
         let population: Option<i64> = match row.get("factbook_population") {
             Some(pop) => Some(pop),
