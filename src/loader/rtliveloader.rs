@@ -22,15 +22,13 @@ pub use crate::dateutil::*;
 use csv;
 use serde::Deserialize;
 use sqlx::Transaction;
-use std::collections::HashMap;
-use std::convert::TryFrom;
 use chrono::NaiveDate;
 
 #[derive(Debug, Deserialize, PartialEq, Clone)]
 pub struct RTLiveRecord {
     pub date: String,
 pub state: String,
-pub index: i64,
+pub rtindex: i64,
 pub mean: f64,
 pub median: f64,
 pub lower_80: f64,
@@ -38,15 +36,16 @@ pub upper_80: f64,
 pub infections: f64,
 pub test_adjusted_positive: f64,
 pub test_adjusted_positive_raw: f64,
-pub tests: i64,
-pub new_tests: Option<i64>,
-pub new_cases: Option<i64>,
-pub new_deaths: Option<i64>,
+    pub positive: f64,
+pub tests: f64,
+pub new_tests: Option<f64>,
+pub new_cases: Option<f64>,
+pub new_deaths: Option<f64>,
 }
 
 pub fn parse_to_final<A: Iterator<Item = csv::StringRecord>>(
     striter: A,
-) -> impl Iterator<Item = FipsRecord> {
+) -> impl Iterator<Item = RTLiveRecord> {
     striter.filter_map(|x| rec_to_struct(&x).expect("rec_to_struct"))
 }
 
@@ -58,9 +57,9 @@ pub async fn load<'a, A: std::io::Read>(
 ) {
     let recs = parse_records(rdr.byte_records());
     let finaliter = parse_to_final(recs);
-    let nd = NaiveDate::parse_from_str(rec.date, "%Y-%m-%d").unwrap();
-    let (y, m, d) = nd_to_ymd(&nd);
     for rec in finaliter {
+        let nd = NaiveDate::parse_from_str(rec.date.as_str(), "%Y-%m-%d").unwrap();
+        let (y, m, d) = nd_to_ymd(&nd);
         let dbrec = RTLive {
             date: rec.date,
             date_julian: nd_to_day(&nd),
@@ -68,22 +67,23 @@ pub async fn load<'a, A: std::io::Read>(
             date_month: m,
             date_day: d,
             state: rec.state,
-            index: rec.index,
-            mean: rec.index,
+            rtindex: rec.rtindex,
+            mean: rec.mean,
             median: rec.median,
             lower_80: rec.lower_80,
             upper_80: rec.upper_80,
             infections: rec.infections,
             test_adjusted_positive: rec.test_adjusted_positive,
             test_adjusted_positive_raw: rec.test_adjusted_positive_raw,
-            tests: rec.tests,
-            new_tests: rec.new_tests,
-            new_caes: rec.new_cases,
-            new_deaths: rec.new_deaths,
+            positive: rec.positive.round() as i64,
+            tests: rec.tests.round() as i64,
+            new_tests: rec.new_tests.map(|x| x.round() as i64),
+            new_cases: rec.new_cases.map(|x| x.round() as i64),
+            new_deaths: rec.new_deaths.map(|x| x.round() as i64),
 
-        }
+        };
         let query =
-            sqlx::query(dbrec.insertstr());
+            sqlx::query(RTLive::insert_str());
         dbrec.bind_query(query)
             .execute(&mut transaction)
             .await

@@ -33,7 +33,7 @@ pub struct RTLive {
     pub date_month: u32,
     pub date_day: u32,
     pub state: String,
-    pub index: i64,
+    pub rtindex: i64,
     pub mean: f64,
     pub median: f64,
     pub lower_80: f64,
@@ -41,6 +41,7 @@ pub struct RTLive {
     pub infections: f64,
     pub test_adjusted_positive: f64,
     pub test_adjusted_positive_raw: f64,
+    pub positive: i64,
     pub tests: i64,
     pub new_tests: Option<i64>,
     pub new_cases: Option<i64>,
@@ -54,12 +55,12 @@ impl RTLive {
         // sed -e 's/ *\([^ ]*\).*/.bind(self.\1)/'
         query
             .bind(self.date)
-            .bind(self.state)
             .bind(self.date_julian)
             .bind(self.date_year)
             .bind(i32::try_from(self.date_month).unwrap())
             .bind(i32::try_from(self.date_day).unwrap())
-            .bind(self.index)
+            .bind(self.state)
+            .bind(self.rtindex)
             .bind(self.mean)
             .bind(self.median)
             .bind(self.lower_80)
@@ -67,6 +68,7 @@ impl RTLive {
             .bind(self.infections)
             .bind(self.test_adjusted_positive)
             .bind(self.test_adjusted_positive_raw)
+            .bind(self.positive)
             .bind(self.tests)
             .bind(self.new_tests)
             .bind(self.new_cases)
@@ -75,7 +77,7 @@ impl RTLive {
 
     /// Gets an INSERT INTO string representing all the values in the table.
     pub fn insert_str() -> &'static str {
-        "INSERT INTO cdataset VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+        "INSERT INTO rtlive VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
     }
 
     /// Sets all date fields in the struct to appropriate representations of the

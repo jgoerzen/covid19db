@@ -23,7 +23,7 @@ Please note that various included data requests or requires attribution.  Please
 
 # Included data and sources
 
-You can find a complete database schema in [dbschema.rs](src/dbschema.rs).  A Rust API for `sqlx` is also provided for select tables.  Direct source data download URLs are in [main.rs](src/main.rs).
+You can find a complete database schema in [dbschema.rs](src/dbschema.rs).  A Rust API for `sqlx` is also provided for select tables.  Direct source data download URLs are in [loader.rs](src/loader.rs).
 
 Here are the sources:
 
@@ -35,6 +35,7 @@ Here are the sources:
   - The source data eliminated rows for a given dataset and location on days on which there were no new cases/deaths (all the delta values would be zero).  For ease of tabulation, those rows are added back in so a given dataseries for a given location should have a row present for every day.
   - The source data used NULL instead of 0 for deltas.  This has been corrected to 0 in these tables.
 - `loc_lookup` is from the [Johns Hopkins dataset](https://github.com/CSSEGISandData/COVID-19), the bulk of which it already included above in `cdataset`.  This table represents the [`UID_ISO_FIPS_LookUp_Table.csv`](https://github.com/CSSEGISandData/COVID-19/blob/master/csse_covid_19_data/UID_ISO_FIPS_LookUp_Table.csv) file, which contains county-level population data that is integrated into `cdataset` or can be queried separately.
+- `rtlive` is from [rt.live](https://rt.live).  Julian dates and YYYY-MM-DD dates are added to the CSV source; no other changes were made. 
 
 # Additional Resources
 

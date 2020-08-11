@@ -30,6 +30,7 @@ mod combinedloader;
 mod loclookuploader;
 mod locparser;
 mod parseutil;
+mod rtliveloader;
 
 pub fn downloadto(url: &str, file: &mut File) {
     let mut result = blocking::get(url).unwrap();
@@ -64,6 +65,18 @@ pub async fn load() {
     println!("Processing {:#?}", csse_fips_path);
     let mut rdr = parseutil::parse_init_file(csse_fips_file).expect("Couldn't init parser");
     let fipshm = loclookuploader::load(&mut rdr, outputpool.begin().await.unwrap()).await;
+
+    // rt.live
+
+    let rt_path = tmp_path.join("rt.csv");
+    let mut rt_file = stdoptions.open(&rt_path).unwrap();
+    println!("Downloading {:#?}", rt_path);
+    downloadto("https://d14wlfuexuxgcm.cloudfront.net/covid/rt.csv",
+               &mut rt_file);
+    rt_file.seek(SeekFrom::Start(0)).unwrap();
+    println!("Processing {:#?}", rt_path);
+    let mut rdr = parseutil::parse_init_file(rt_file).expect("Couldn't init parser");
+    rtliveloader::load(&mut rdr, outputpool.begin().await.unwrap()).await;
 
     // Location map
 

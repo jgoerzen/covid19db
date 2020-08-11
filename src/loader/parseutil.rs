@@ -23,6 +23,7 @@ use std::fmt::Display;
 use std::fs::File;
 use std::str::FromStr;
 
+#[allow(dead_code)]
 pub fn date_from_str<'de, S, D>(deserializer: D) -> Result<S, D::Error>
 where
     S: FromStr,      // Required for S::from_str...
@@ -57,6 +58,7 @@ pub fn parse_records<'a, A: std::io::Read>(
     byteiter.map(|x| csv::StringRecord::from_byte_record_lossy(x.expect("Error in parse_records")))
 }
 
+#[allow(dead_code)]
 pub fn parse_record(rec: csv::ByteRecord) -> csv::StringRecord {
     csv::StringRecord::from_byte_record_lossy(rec)
 }
