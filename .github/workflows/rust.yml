@@ -16,7 +16,16 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: Build
-      run: cargo build --verbose
-    - name: Run tests
-      run: cargo test --verbose
+#    - name: Build
+#      run: cargo build --verbose
+#    - name: Run tests
+#      run: cargo test --verbose
+    - name: Execute
+      run: cargo run --release
+    - name: Compress
+      run: gzip -9 covid19.db
+    - name: Upload a Build Artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: covid19.db
+        path: covid19.db
