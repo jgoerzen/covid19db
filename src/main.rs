@@ -16,32 +16,20 @@ Copyright (c) 2019-2020 John Goerzen
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+use libflate::gzip::Decoder;
+use reqwest::blocking;
 use sqlx::prelude::*;
 use sqlx::sqlite::SqlitePool;
-use std::env;
-use std::error::Error;
-use std::ffi::OsString;
 use std::fs::{File, OpenOptions};
-use tempfile::tempdir;
 use std::io::{Seek, SeekFrom};
-use reqwest::blocking;
-use libflate::gzip::Decoder;
 use std::mem::drop;
+use tempfile::tempdir;
 
 mod combinedloader;
 mod dbschema;
 mod loclookuploader;
 mod locparser;
 mod parseutil;
-
-/// Returns the first positional argument sent to this process. If there are no
-/// positional arguments, then this returns an error.
-fn get_nth_arg(arg: usize) -> Result<OsString, Box<dyn Error>> {
-    match env::args_os().nth(arg) {
-        None => Err(From::from("expected argument, but got none; syntax: covid19db-loader path-to-csse_covid_19_data_UID_ISO_FIPS_LookUp_Table.csv path-to-locations-diff.tsv path-to-input-values-sqlite.db")),
-        Some(file_path) => Ok(file_path),
-    }
-}
 
 fn downloadto(url: &str, file: &mut File) {
     let mut result = blocking::get(url).unwrap();
@@ -72,7 +60,7 @@ async fn main() {
     println!("Downloading {:#?}", csse_fips_path);
     downloadto("https://github.com/CSSEGISandData/COVID-19/raw/master/csse_covid_19_data/UID_ISO_FIPS_LookUp_Table.csv",
                &mut csse_fips_file);
-    csse_fips_file.seek(SeekFrom::Start(0));
+    csse_fips_file.seek(SeekFrom::Start(0)).unwrap();
     println!("Processing {:#?}", csse_fips_path);
     let mut rdr = parseutil::parse_init_file(csse_fips_file).expect("Couldn't init parser");
     let fipshm = loclookuploader::load(&mut rdr, outputpool.begin().await.unwrap()).await;
@@ -84,7 +72,7 @@ async fn main() {
     println!("Downloading {:#?}", loc_path);
     downloadto("https://github.com/cipriancraciun/covid19-datasets/raw/master/exports/combined/v1/locations-diff.tsv",
                &mut loc_file);
-    loc_file.seek(SeekFrom::Start(0));
+    loc_file.seek(SeekFrom::Start(0)).unwrap();
     println!("Processing {:#?}", loc_path);
     let mut rdr = locparser::parse_init_file(loc_file).expect("Couldn't init parser");
     let lochm = locparser::parse(&fipshm, &mut rdr);
@@ -98,7 +86,10 @@ async fn main() {
     let mut decoder = Decoder::new(&mut result).unwrap();
     std::io::copy(&mut decoder, &mut combined_file).unwrap();
     drop(combined_file);
-    println!("Processing {:#?}...  This one will take a little while...", combined_path);
+    println!(
+        "Processing {:#?}...  This one will take a little while...",
+        combined_path
+    );
 
     let mut inputpool = SqlitePool::builder()
         .max_size(5)
@@ -112,4 +103,5 @@ async fn main() {
     conn.execute("VACUUM").await.unwrap();
     println!("Optimizing");
     conn.execute("PRAGMA OPTIMIZE").await.unwrap();
+    println!("Finished successfully!");
 }

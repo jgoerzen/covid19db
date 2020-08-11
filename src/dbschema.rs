@@ -16,10 +16,10 @@ Copyright (c) 2020 John Goerzen
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+use chrono::Datelike;
+use julianday::JulianDay;
 use sqlx::prelude::*;
 use sqlx::Query;
-use julianday::JulianDay;
-use chrono::Datelike;
 use std::convert::TryFrom;
 
 pub async fn initdb<E: Executor>(db: &mut E) -> () {

@@ -22,7 +22,6 @@ use serde::Deserialize;
 use std::collections::HashMap;
 use std::error::Error;
 use std::fs::File;
-use std::path::Path;
 
 #[derive(Debug, Deserialize, PartialEq, Clone)]
 pub struct LocRecord {

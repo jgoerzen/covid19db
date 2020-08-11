@@ -21,7 +21,6 @@ use serde::{de, Deserialize, Deserializer};
 use std::error::Error;
 use std::fmt::Display;
 use std::fs::File;
-use std::path::Path;
 use std::str::FromStr;
 
 pub fn date_from_str<'de, S, D>(deserializer: D) -> Result<S, D::Error>

@@ -25,6 +25,8 @@ use sqlx::prelude::*;
 use sqlx::Transaction;
 use std::collections::HashMap;
 use std::convert::TryFrom;
+use std::io;
+use std::io::Write;
 use std::mem::drop;
 
 /// Calculates the absolute rate per 100k population in case it's not there
@@ -46,10 +48,13 @@ fn set_per_pop(
 }
 
 /// Fill up rows in which no changes occurred.
-async fn fillup(mut transaction: &mut Transaction<sqlx::pool::PoolConnection<sqlx::SqliteConnection>>,
-          lastrow: &Option<CDataSet>,
-          nextrow: Option<&CDataSet>,
-          prevdate: &NaiveDate, maxdate: &NaiveDate) {
+async fn fillup(
+    mut transaction: &mut Transaction<sqlx::pool::PoolConnection<sqlx::SqliteConnection>>,
+    lastrow: &Option<CDataSet>,
+    nextrow: Option<&CDataSet>,
+    prevdate: &NaiveDate,
+    maxdate: &NaiveDate,
+) {
     // If there was no last row, nothing to do.
     if let Some(lastrow) = lastrow {
         let targetmaxdate = if let Some(nextrow) = nextrow {
@@ -67,7 +72,8 @@ async fn fillup(mut transaction: &mut Transaction<sqlx::pool::PoolConnection<sql
         };
 
         // The +1 because we want to start AFTER the last row.
-        let mut thisjulian = JulianDay::new(i32::try_from(lastrow.date_julian).unwrap()).inner() + 1;
+        let mut thisjulian =
+            JulianDay::new(i32::try_from(lastrow.date_julian).unwrap()).inner() + 1;
         let maxjulian = JulianDay::from(*targetmaxdate).inner();
         let mut add_days: i64 = 1;
         while thisjulian <= maxjulian {
@@ -92,9 +98,9 @@ async fn fillup(mut transaction: &mut Transaction<sqlx::pool::PoolConnection<sql
             println!("{:?}", cds);
             */
             cds.bind_query(query)
-               .execute(&mut transaction)
-               .await
-               .unwrap();
+                .execute(&mut transaction)
+                .await
+                .unwrap();
             thisjulian += 1;
             add_days += 1;
         }
@@ -118,7 +124,16 @@ pub async fn load(
     let mut transaction = outputpool.begin().await.unwrap();
 
     let mut iconn = inputpool.acquire().await.unwrap();
-    let maxdate_str: (String, ) = sqlx::query_as("SELECT MAX(date) FROM dataset").fetch_one(&mut iconn).await.unwrap();
+    let totalrecs: (i64,) = sqlx::query_as("SELECT COUNT(*) FROM dataset")
+        .fetch_one(&mut iconn)
+        .await
+        .unwrap();
+    let mut processedrecs: i64 = 0;
+
+    let maxdate_str: (String,) = sqlx::query_as("SELECT MAX(date) FROM dataset")
+        .fetch_one(&mut iconn)
+        .await
+        .unwrap();
     let maxdate = NaiveDate::parse_from_str(maxdate_str.0.as_str(), "%Y-%m-%d").unwrap();
 
     let mut cursor =
@@ -137,7 +152,8 @@ pub async fn load(
         let nd = NaiveDate::from_ymd(
             row.get("date_year"),
             u32::try_from(row.get::<i32, &str>("date_month")).unwrap(),
-            u32::try_from(row.get::<i32, &str>("date_day")).unwrap());
+            u32::try_from(row.get::<i32, &str>("date_day")).unwrap(),
+        );
         let julian = JulianDay::from(nd).inner();
 
         let population: Option<i64> = match row.get("factbook_population") {
@@ -148,8 +164,6 @@ pub async fn load(
                     .and_then(|y| Some(i64::try_from(*y).unwrap()))
             }),
         };
-
-
 
         let query = sqlx::query(CDataSet::insert_str());
         let cds = CDataSet {
@@ -223,12 +237,27 @@ pub async fn load(
         fillup(&mut transaction, &lastrow, Some(&cds), &nd.pred(), &maxdate).await;
         // println!("Adding {}", cds.date_julian);
         // println!("{:?}", cds);
-        cds.clone().bind_query(query)
+        cds.clone()
+            .bind_query(query)
             .execute(&mut transaction)
             .await
             .unwrap();
         lastrow = Some(cds);
+        processedrecs += 1;
+        if processedrecs % 1000 == 0 {
+            print!(
+                "Processed {} of {} input records\r",
+                processedrecs, totalrecs.0
+            );
+            io::stdout().flush().unwrap();
+        }
     }
     fillup(&mut transaction, &lastrow, None, &maxdate, &maxdate).await;
+    println!(
+        "Processed {} of {} input records",
+        processedrecs, totalrecs.0
+    );
+    io::stdout().flush().unwrap();
+    println!("Committing...");
     transaction.commit().await.unwrap();
 }
