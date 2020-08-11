@@ -37,6 +37,7 @@ Here are the sources:
 - `loc_lookup` is from the [Johns Hopkins dataset](https://github.com/CSSEGISandData/COVID-19), the bulk of which it already included above in `cdataset`.  This table represents the [`UID_ISO_FIPS_LookUp_Table.csv`](https://github.com/CSSEGISandData/COVID-19/blob/master/csse_covid_19_data/UID_ISO_FIPS_LookUp_Table.csv) file, which contains county-level population data that is integrated into `cdataset` or can be queried separately.
 - `rtlive` is from [rt.live](https://rt.live).  Julian dates and YYYY-MM-DD dates are added to the CSV source; no other changes were made. 
 - `covid19tracking` is from the [COVID-19 Tracking Project data downloads](https://covidtracking.com/data/download).  Julian dates and Y/M/D dates are added to the CSV source; no other changes were made.
+  - The COVID Tracking Project makes a separate US file available, which aggregates data to have one row per day across the entire USA.  Instead of parsing another file, there is a view `covid19tracking_us` that uses the data in `covid19tracking` to present the same kind of view.
 
 # Additional Resources
 
