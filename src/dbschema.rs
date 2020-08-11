@@ -192,6 +192,7 @@ pub struct CDataSet {
 
 impl CDataSet {
     /// Load from a row from a `select(*)`.  Probably want to use the `FromRow` derivation instead, really.
+    #[allow(dead_code)]
     pub fn from_row<'c>(row: &sqlx::sqlite::SqliteRow<'c>) -> Self {
         // From the schema
         CDataSet {
@@ -360,12 +361,14 @@ impl CDataSet {
         self.data_key = format!("{}-{}", self.data_key, julian);
     }
 
+    #[allow(dead_code)]
     /// Sets all date fields in the struct to the appropriate representation of
     /// the given `JulianDay`.
     pub fn set_date_julianday(&mut self, jd: &JulianDay) {
         self.set_date(jd.clone().inner());
     }
 
+    #[allow(dead_code)]
     /// Sets all date fields in the struct to the appropriate representation of
     /// the given `NaiveDate` from the `chrono` package.
     pub fn set_date_naivedate(&mut self, nd: &NaiveDate) {
