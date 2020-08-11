@@ -1,4 +1,14 @@
-# COVID-19 in Kansas: Masks vs. No-Masks
+# COVID-19 Database for Research and Analysis
+
+This repository contains tools to generate a COVID-19 database for research and analysis, and links to a pre-generated database.  The database is a self-contained [Sqlite](https://www.sqlite.org/) database which can be used on any platform.
+
+The program in this library can be run on your machine to download data from the Internet and assemble your own database.  The process takes approximately two minutes and you can run it however often you like to obtain the latest data.  Alternatively, a database is generated daily that you can download as well.
+
+# Included data and sources
+
+You can find a complete database schema in [dbschema.rs](src/dbschema.rs).  
+
+You can find det
 
 https://source.opennews.org/articles/comparison-four-major-covid-19-data-sources/
 https://www.cdc.gov/nchs/nvss/vsrr/covid_weekly/index.htm

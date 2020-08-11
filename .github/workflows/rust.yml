@@ -5,6 +5,8 @@ on:
     branches: [ master ]
   pull_request:
     branches: [ master ]
+  schedule:
+    - cron: '0 11 * * *'
 
 env:
   CARGO_TERM_COLOR: always
@@ -27,5 +29,5 @@ jobs:
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v2
       with:
-        name: covid19.db
-        path: covid19.db
+        name: covid19.db.gz
+        path: covid19.db.gz

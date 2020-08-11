@@ -244,7 +244,7 @@ pub async fn load(
             .unwrap();
         lastrow = Some(cds);
         processedrecs += 1;
-        if processedrecs % 1000 == 0 {
+        if processedrecs % 10000 == 0 {
             print!(
                 "Processed {} of {} input records\r",
                 processedrecs, totalrecs.0
