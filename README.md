@@ -48,7 +48,6 @@ These are potential future integrations:
 - https://catalog.data.gov/dataset/covid-19-cases-summarized-by-age-group-and-gender
 - https://aws.amazon.com/data-exchange/covid-19/?cards.sort-by=item.additionalFields.order&cards.sort-order=asc
 - https://duckduckgo.com/?t=ffab&q=covid-19+data+set+by+age&ia=web
-- https://rt.live/
 - https://covidtracking.com/data/download
 
 # Building your own database
@@ -69,9 +68,13 @@ With these commands, you can verify these results for yourself.  If you don't al
 
 It is pretty skeletal at the moment, but you can [browse the docs](https://docs.rs/covid19db/latest/covid19db/).
 
+# Users
+
+This data is used by the [Kansas COVID-19 Charts project](https://github.com/jgoerzen/covid19ks) and perhaps others.
+
 # Copyright
 
-Copyright (c) 2019-2020 John Goerzen
+This code is Copyright (c) 2019-2020 John Goerzen
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
