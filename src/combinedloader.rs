@@ -23,7 +23,7 @@ use chrono::NaiveDate;
 use sqlx::prelude::*;
 use sqlx::Transaction;
 use std::collections::HashMap;
-use std::convert::TryFrom;
+use std::convert::{TryFrom, TryInto};
 use std::io;
 use std::io::Write;
 use std::mem::drop;
@@ -183,8 +183,8 @@ pub async fn load(
             date: row.get("date"),
             date_julian: julian,
             date_year: row.get("date_year"),
-            date_month: row.get("date_month"),
-            date_day: row.get("date_day"),
+            date_month: row.get::<i32, &str>("date_month").try_into().unwrap(),
+            date_day: row.get::<i32, &str>("date_day").try_into().unwrap(),
             day_index_0: row.get("day_index_0"),
             day_index_1: row.get("day_index_1"),
             day_index_10: row.get("day_index_10"),

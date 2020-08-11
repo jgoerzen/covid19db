@@ -20,7 +20,7 @@ use chrono::{Datelike, NaiveDate};
 use julianday::JulianDay;
 use sqlx::prelude::*;
 use sqlx::Query;
-use std::convert::TryInto;
+use std::convert::{TryFrom, TryInto};
 use crate::dateutil::*;
 
 /** The `CDataSet` struct represents a row in the `cdataset` table.  It is an instance
@@ -47,8 +47,8 @@ pub struct CDataSet {
     pub date: String,
     pub date_julian: i32,
     pub date_year: i32,
-    pub date_month: i32,
-    pub date_day: i32,
+    pub date_month: u32,
+    pub date_day: u32,
     pub day_index_0: i32,
     pub day_index_1: i32,
     pub day_index_10: Option<i32>,
@@ -114,8 +114,8 @@ impl CDataSet {
             date: row.get("date"),
             date_julian: row.get("date_julian"),
             date_year: row.get("date_year"),
-            date_month: row.get("date_month"),
-            date_day: row.get("date_day"),
+            date_month: row.get::<i32, &str>("date_month").try_into().unwrap(),
+            date_day: row.get::<i32, &str>("date_day").try_into().unwrap(),
             day_index_0: row.get("day_index_0"),
             day_index_1: row.get("day_index_1"),
             day_index_10: row.get("day_index_10"),
@@ -181,8 +181,8 @@ impl CDataSet {
             .bind(self.date)
             .bind(self.date_julian)
             .bind(self.date_year)
-            .bind(self.date_month)
-            .bind(self.date_day)
+            .bind(i32::try_from(self.date_month).unwrap())
+            .bind(i32::try_from(self.date_day).unwrap())
             .bind(self.day_index_0)
             .bind(self.day_index_1)
             .bind(self.day_index_10)
@@ -257,8 +257,8 @@ impl CDataSet {
         self.date_julian = julian;
         self.date = format!("{}", nd.format("%Y-%m-%d"));
         self.date_year = nd.year();
-        self.date_month = nd.month().try_into().unwrap();
-        self.date_day = nd.day().try_into().unwrap();
+        self.date_month = nd.month();
+        self.date_day = nd.day();
         self.data_key = format!("{}-{}", self.data_key, julian);
     }
 
