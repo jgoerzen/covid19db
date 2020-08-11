@@ -30,6 +30,7 @@ mod dbschema;
 mod loclookuploader;
 mod locparser;
 mod parseutil;
+mod dateutil;
 
 fn downloadto(url: &str, file: &mut File) {
     let mut result = blocking::get(url).unwrap();
