@@ -21,6 +21,10 @@ use sqlx::sqlite::SqlitePool;
 use std::env;
 use std::error::Error;
 use std::ffi::OsString;
+use std::fs::{File, OpenOptions};
+use tempfile::tempdir;
+use std::io::{Seek, SeekFrom};
+use reqwest::blocking;
 
 mod combinedloader;
 mod dbschema;
@@ -37,8 +41,20 @@ fn get_nth_arg(arg: usize) -> Result<OsString, Box<dyn Error>> {
     }
 }
 
+fn downloadto(url: &str, file: &mut File) {
+    let mut result = blocking::get(url).unwrap();
+    result.copy_to(file).unwrap();
+}
+
 #[tokio::main]
 async fn main() {
+    let tmp_dir = tempdir().unwrap();
+    let tmp_path = tmp_dir.path().to_owned();
+    let mut stdoptions = &mut OpenOptions::new();
+    stdoptions = stdoptions.read(true).write(true).create_new(true);
+
+    // OUTPUT DB INIT
+
     println!("Initializing output database");
     let mut outputpool = SqlitePool::builder()
         .max_size(5)
@@ -47,10 +63,19 @@ async fn main() {
         .expect("Error building output sqlite");
     dbschema::initdb(&mut outputpool.acquire().await.unwrap()).await;
 
-    println!("Processing loc_lookup FIPS map");
-    let file_path = get_nth_arg(1).expect("need args: path-to-fips.csv");
-    let mut rdr = parseutil::parse_init_file(file_path).expect("Couldn't init parser");
+    // CSSE FIPS
+
+    let csse_fips_path = tmp_path.join("UID_ISO_FIPS_LookUp_Table.csv");
+    let mut csse_fips_file = stdoptions.open(&csse_fips_path).unwrap();
+    println!("Downloading {:#?}", csse_fips_path);
+    downloadto("https://github.com/CSSEGISandData/COVID-19/raw/master/csse_covid_19_data/UID_ISO_FIPS_LookUp_Table.csv",
+               &mut csse_fips_file);
+    csse_fips_file.seek(SeekFrom::Start(0));
+    println!("Processing {:#?}", csse_fips_path);
+    let mut rdr = parseutil::parse_init_file(csse_fips_file).expect("Couldn't init parser");
     let fipshm = loclookuploader::load(&mut rdr, outputpool.begin().await.unwrap()).await;
+
+    println!("Processing loc_lookup FIPS map");
 
     println!("Processing location data");
     let file_path = get_nth_arg(2).expect("need args: path-to-locations-diff.tsv");

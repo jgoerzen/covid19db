@@ -15,3 +15,5 @@ chrono = "0.4"
 julianday = "0.2"
 sqlx = { version = "0.3", default-features = false, features = ["runtime-tokio", "macros", "sqlite", "chrono"] }
 tokio = { version = "0.2", features = ["macros"] }
+reqwest = { version = "0.10", features = ["blocking", "stream", "socks"] }
+tempfile = "3.1"
