@@ -59,8 +59,7 @@ pub fn parse_to_final<A: Iterator<Item = csv::StringRecord>>(
     striter.filter_map(|x| rec_to_struct(&x).expect("rec_to_struct"))
 }
 
-pub fn parse_init_file<P: AsRef<Path>>(filename: P) -> Result<csv::Reader<File>, Box<dyn Error>> {
-    let file = File::open(filename)?;
+pub fn parse_init_file(file: File) -> Result<csv::Reader<File>, Box<dyn Error>> {
     let rdr = csv::ReaderBuilder::new()
         .delimiter(b'\t')
         .double_quote(false)

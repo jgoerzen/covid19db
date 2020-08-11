@@ -25,6 +25,8 @@ use std::fs::{File, OpenOptions};
 use tempfile::tempdir;
 use std::io::{Seek, SeekFrom};
 use reqwest::blocking;
+use libflate::gzip::Decoder;
+use std::mem::drop;
 
 mod combinedloader;
 mod dbschema;
@@ -75,18 +77,32 @@ async fn main() {
     let mut rdr = parseutil::parse_init_file(csse_fips_file).expect("Couldn't init parser");
     let fipshm = loclookuploader::load(&mut rdr, outputpool.begin().await.unwrap()).await;
 
-    println!("Processing loc_lookup FIPS map");
+    // Location map
 
-    println!("Processing location data");
-    let file_path = get_nth_arg(2).expect("need args: path-to-locations-diff.tsv");
-    let mut rdr = locparser::parse_init_file(file_path).expect("Couldn't init parser");
+    let loc_path = tmp_path.join("locations-diff.tsv");
+    let mut loc_file = stdoptions.open(&loc_path).unwrap();
+    println!("Downloading {:#?}", loc_path);
+    downloadto("https://github.com/cipriancraciun/covid19-datasets/raw/master/exports/combined/v1/locations-diff.tsv",
+               &mut loc_file);
+    loc_file.seek(SeekFrom::Start(0));
+    println!("Processing {:#?}", loc_path);
+    let mut rdr = locparser::parse_init_file(loc_file).expect("Couldn't init parser");
     let lochm = locparser::parse(&fipshm, &mut rdr);
 
-    println!("Processing SQLITE data");
-    let input_path = get_nth_arg(3).expect("Need args: path to sqlite.db");
+    // Sqlite Combined
+
+    let combined_path = tmp_path.join("values-sqlite.db");
+    let mut combined_file = stdoptions.open(&combined_path).unwrap();
+    println!("Downloading and decompressing {:#?}", combined_path);
+    let mut result = blocking::get("https://github.com/cipriancraciun/covid19-datasets/raw/master/exports/combined/v1/values-sqlite.db.gz").unwrap();
+    let mut decoder = Decoder::new(&mut result).unwrap();
+    std::io::copy(&mut decoder, &mut combined_file).unwrap();
+    drop(combined_file);
+    println!("Processing {:#?}...  This one will take a little while...", combined_path);
+
     let mut inputpool = SqlitePool::builder()
         .max_size(5)
-        .build(format!("sqlite::{}", input_path.into_string().unwrap()).as_ref())
+        .build(format!("sqlite::{}", combined_path.to_str().unwrap()).as_ref())
         .await
         .expect("Error building");
     combinedloader::load(&mut inputpool, &mut outputpool, &lochm, &fipshm).await;
