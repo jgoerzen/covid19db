@@ -32,10 +32,14 @@ pub async fn initdb<E: Executor>(db: &mut E) -> () {
         "drop index if exists loc_lookup_fips",
         "drop table if exists loc_lookup",
         "drop table if exists covid19schema",
+        "drop index if exists rtlive_uniq_idx",
+        "drop table if exists rtlive",
         "create table covid19schema (version integer not null, minorversion integer not null)",
         "insert into covid19schema values (1, 0)",
+        //
         // From Johns Hopkins UID_ISO_FIPS_LookUp_Table.csv
         // https://github.com/CSSEGISandData/COVID-19/blob/master/csse_covid_19_data/UID_ISO_FIPS_LookUp_Table.csv
+        //
         "create table loc_lookup (
          uid integer not null primary key,
          iso2 text not null,
@@ -50,7 +54,33 @@ pub async fn initdb<E: Executor>(db: &mut E) -> () {
          combined_key text not null,
          population integer)",
         "create index loc_lookup_fips on loc_lookup (fips)",
+        //
+        // rt.live data
+        // https://d14wlfuexuxgcm.cloudfront.net/covid/rt.csv
+        //
+        "create table rtlive(
+         date text not null,
+         state text not null,
+         date_julian integer not null,
+         date_year integer not null,
+         date_month integer not null,
+         date_day integer not null,
+         index integer not null,
+         mean real not null,
+         median real not null,
+         lower_80 real not null,
+         upper_80 real not null,
+         infections real not null,
+         test_adjusted_positive real not null,
+         test_adjusted_positive_raw real not null,
+         tests integer not null,
+         new_tests integer,
+         new_cases integer,
+         new_deaths integer)",
+        "create index rtlive_uniq_idx on rtlive (state, date_julian)",
+        //
         // From https://github.com/cipriancraciun/covid19-datasets/blob/master/exports/combined/v1/values-sqlite.db.gz
+        //
         "create table cdataset (
         dataset text not null,
         data_key text not null,

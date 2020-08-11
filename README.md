@@ -12,6 +12,15 @@ You can download a compressed database for yourself here: [covid19db.zip](https:
 
 This file is automatically regenerated daily.
 
+# Using the data
+
+Besides the [Sqlite](https://www.sqlite.org/) command-line tools, here are some other tips on using the data:
+
+- The [DB Browser for SQLite](https://sqlitebrowser.org) is a nice graphical explorer for SQLite.
+- You can use SQLite in Microsoft Excel and LibreOffice.  Search for information on doing so.
+
+Please note that various included data requests or requires attribution.  Please give credit to original sources of data (eg, The New York Times) and aggregators in your work.
+
 # Included data and sources
 
 You can find a complete database schema in [dbschema.rs](src/dbschema.rs).  A Rust API for `sqlx` is also provided for select tables.  Direct source data download URLs are in [main.rs](src/main.rs).
