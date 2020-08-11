@@ -17,8 +17,8 @@ Copyright (c) 2020 John Goerzen
 */
 
 use crate::dbschema::*;
-use crate::locparser::LocRec;
-pub use crate::parseutil::*;
+use crate::loader::locparser::LocRec;
+pub use crate::loader::parseutil::*;
 use chrono::NaiveDate;
 use sqlx::prelude::*;
 use sqlx::Transaction;

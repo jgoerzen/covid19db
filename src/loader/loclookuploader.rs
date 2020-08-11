@@ -16,7 +16,7 @@ Copyright (c) 2019-2020 John Goerzen
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-pub use crate::parseutil::*;
+pub use crate::loader::parseutil::*;
 use csv;
 use serde::Deserialize;
 use sqlx::Transaction;

@@ -25,20 +25,19 @@ use std::io::{Seek, SeekFrom};
 use std::mem::drop;
 use tempfile::tempdir;
 
-mod combinedloader;
-mod dbschema;
+use crate::dbschema;
 mod loclookuploader;
 mod locparser;
 mod parseutil;
-mod dateutil;
+mod combinedloader;
 
-fn downloadto(url: &str, file: &mut File) {
+pub fn downloadto(url: &str, file: &mut File) {
     let mut result = blocking::get(url).unwrap();
     result.copy_to(file).unwrap();
 }
 
-#[tokio::main]
-async fn main() {
+/** Downloads the data and puts it in `covid19.db` in the current working directory. */
+pub async fn load() {
     let tmp_dir = tempdir().unwrap();
     let tmp_path = tmp_dir.path().to_owned();
     let mut stdoptions = &mut OpenOptions::new();
