@@ -16,12 +16,12 @@ Copyright (c) 2020 John Goerzen
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+use crate::dateutil::*;
 use chrono::{Datelike, NaiveDate};
 use julianday::JulianDay;
 use sqlx::prelude::*;
 use sqlx::Query;
 use std::convert::{TryFrom, TryInto};
-use crate::dateutil::*;
 
 /** The `CDataSet` struct represents a row in the `cdataset` table.  It is an instance
 of `sqlx::FromRow` for the benefit of users of `sqlx::query_as`. */

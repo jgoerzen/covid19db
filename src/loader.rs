@@ -26,10 +26,10 @@ use std::mem::drop;
 use tempfile::tempdir;
 
 use crate::dbschema;
+mod combinedloader;
 mod loclookuploader;
 mod locparser;
 mod parseutil;
-mod combinedloader;
 
 pub fn downloadto(url: &str, file: &mut File) {
     let mut result = blocking::get(url).unwrap();

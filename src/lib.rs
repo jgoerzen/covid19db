@@ -19,6 +19,6 @@ Copyright (c) 2019-2020 John Goerzen
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-pub mod dbschema;
 pub mod dateutil;
+pub mod dbschema;
 pub mod loader;

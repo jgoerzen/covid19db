@@ -121,4 +121,3 @@ pub async fn initdb<E: Executor>(db: &mut E) -> () {
             .expect("Error executing statement");
     }
 }
-

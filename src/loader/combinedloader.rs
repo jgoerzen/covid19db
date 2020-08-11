@@ -16,6 +16,7 @@ Copyright (c) 2020 John Goerzen
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+use crate::dateutil::*;
 use crate::dbschema::*;
 use crate::loader::locparser::LocRec;
 pub use crate::loader::parseutil::*;
@@ -27,7 +28,6 @@ use std::convert::{TryFrom, TryInto};
 use std::io;
 use std::io::Write;
 use std::mem::drop;
-use crate::dateutil::*;
 
 /// Calculates the absolute rate per 100k population in case it's not there
 fn set_per_pop(

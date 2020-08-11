@@ -17,7 +17,7 @@ Copyright (c) 2020 John Goerzen
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-use chrono::{offset::TimeZone, Date, NaiveDate, Utc, Datelike, Local, LocalResult};
+use chrono::{offset::TimeZone, Date, Datelike, Local, LocalResult, NaiveDate, Utc};
 use julianday::JulianDay;
 
 /** Convert a day to a [`JulianDay`]
@@ -33,7 +33,7 @@ assert_eq!(day_to_jd(2457096), JulianDay::from(NaiveDate::from_ymd(2015, 3, 14))
 */
 #[allow(dead_code)]
 pub fn day_to_jd(day: i32) -> JulianDay {
-   JulianDay::new(day)
+    JulianDay::new(day)
 }
 
 /** Convert a day to a [`NaiveDate`].
