@@ -55,6 +55,10 @@ You will then get a file named `covid19.db` in the working directory.  Just use 
 
 With these commands, you can verify these results for yourself.  If you don't already have Rust installed, see the [Rust installation](https://www.rust-lang.org/tools/install) page.
 
+# The Rust library
+
+It is pretty skeletal at the moment, but you can [browse the docs](https://docs.rs/covid19db/latest/covid19db/).
+
 # Copyright
 
 Copyright (c) 2019-2020 John Goerzen
