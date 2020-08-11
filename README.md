@@ -36,6 +36,7 @@ Here are the sources:
   - The source data used NULL instead of 0 for deltas.  This has been corrected to 0 in these tables.
 - `loc_lookup` is from the [Johns Hopkins dataset](https://github.com/CSSEGISandData/COVID-19), the bulk of which it already included above in `cdataset`.  This table represents the [`UID_ISO_FIPS_LookUp_Table.csv`](https://github.com/CSSEGISandData/COVID-19/blob/master/csse_covid_19_data/UID_ISO_FIPS_LookUp_Table.csv) file, which contains county-level population data that is integrated into `cdataset` or can be queried separately.
 - `rtlive` is from [rt.live](https://rt.live).  Julian dates and YYYY-MM-DD dates are added to the CSV source; no other changes were made. 
+- `covid19tracking` is from the [COVID-19 Tracking Project data downloads](https://covidtracking.com/data/download).  Julian dates and Y/M/D dates are added to the CSV source; no other changes were made.
 
 # Additional Resources
 
@@ -48,7 +49,6 @@ These are potential future integrations:
 - https://catalog.data.gov/dataset/covid-19-cases-summarized-by-age-group-and-gender
 - https://aws.amazon.com/data-exchange/covid-19/?cards.sort-by=item.additionalFields.order&cards.sort-order=asc
 - https://duckduckgo.com/?t=ffab&q=covid-19+data+set+by+age&ia=web
-- https://covidtracking.com/data/download
 
 # Building your own database
 
@@ -72,9 +72,9 @@ It is pretty skeletal at the moment, but you can [browse the docs](https://docs.
 
 This data is used by the [Kansas COVID-19 Charts project](https://github.com/jgoerzen/covid19ks) and perhaps others.
 
-# Copyright
+# Copyright and Acknowledgments
 
-This code is Copyright (c) 2019-2020 John Goerzen
+    This code is Copyright (c) 2019-2020 John Goerzen
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -89,3 +89,42 @@ This code is Copyright (c) 2019-2020 John Goerzen
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+This repository contains only tools for obtaining data and no data itself, though the data itself may be available elsewhere on Github.  If you use the data herein, or download it, you may be required to acknowledge the source.  Here are some details:
+
+## cdataset - New York Times
+
+In general, we are making this data publicly available for broad, noncommercial public use including by medical and public health researchers, policymakers, analysts and local news media.
+
+If you use this data, you must attribute it to “The New York Times” in any publication. If you would like a more expanded description of the data, you could say “Data from The New York Times, based on reports from state and local health agencies.”
+
+If you use it in an online presentation, we would appreciate it if you would link to our U.S. tracking page at https://www.nytimes.com/interactive/2020/us/coronavirus-us-cases.html.
+
+If you use this data, please let us know at covid-data@nytimes.com.
+
+See our LICENSE for the full terms of use for this data.
+
+This license is co-extensive with the Creative Commons Attribution-NonCommercial 4.0 International license, and licensees should refer to that license (CC BY-NC) if they have questions about the scope of the license.
+
+[source](https://github.com/nytimes/covid-19-data)
+
+## cdataset and loc_lookup - Johns Hopkins
+
+1.    This data set is licensed under the Creative Commons Attribution 4.0 International (CC BY 4.0) by the Johns Hopkins University on behalf of its Center for Systems Science in Engineering. Copyright Johns Hopkins University 2020.
+2.    Attribute the data as the "COVID-19 Data Repository by the Center for Systems Science and Engineering (CSSE) at Johns Hopkins University" or "JHU CSSE COVID-19 Data" for short, and the url: https://github.com/CSSEGISandData/COVID-19.
+3.    For publications that use the data, please cite the following publication: "Dong E, Du H, Gardner L. An interactive web-based dashboard to track COVID-19 in real time. Lancet Inf Dis. 20(5):533-534. doi: 10.1016/S1473-3099(20)30120-1"
+
+[source](https://github.com/CSSEGISandData/COVID-19)
+
+## rtlive - rt.live
+
+We just ask that you cite Rt.live as the source and link where appropriate.
+
+[source](https://rt.live/faq)
+
+## covid19tracking - COVID-19 Tracking Project
+
+You are welcome to copy, distribute, and develop data and website content from The COVID Tracking Project at The Atlantic for all healthcare, medical, journalistic and non-commercial uses, including any personal, editorial, academic, or research purposes.
+
+The COVID Tracking Project at The Atlantic data and website content is published under a Creative Commons CC BY-NC-4.0 license, which requires users to attribute the source and license type (CC BY-NC-4.0) when sharing our data or website content. The COVID Tracking Project at The Atlantic also grants permission for any derivative use of this data and website content that supports healthcare or medical research (including institutional use by public health and for-profit organizations), or journalistic usage (by nonprofit or for-profit organizations). All other commercial uses are not permitted under the Creative Commons license, and will require permission from The COVID Tracking Project at The Atlantic.
+
+[source](https://covidtracking.com/about-data/license)

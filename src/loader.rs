@@ -73,7 +73,7 @@ pub async fn load() {
     let mut file = stdoptions.open(&path).unwrap();
     println!("Downloading {:#?}", path);
     downloadto(
-        "https://d14wlfuexuxgcm.cloudfront.net/covid/rt.csv",
+        "https://covidtracking.com/api/v1/states/daily.csv",
         &mut file,
     );
     file.seek(SeekFrom::Start(0)).unwrap();

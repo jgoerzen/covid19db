@@ -45,7 +45,7 @@ pub struct CsvRec {
     pub checkTimeEt: Option<String>,
     pub death: Option<i64>,
     pub hospitalized: Option<i64>,
-    pub dateChecked: Option<i64>,
+    pub dateChecked: Option<String>,
     pub totalTestsViral: Option<i64>,
     pub positiveTestsViral: Option<i64>,
     pub negativeTestsViral: Option<i64>,

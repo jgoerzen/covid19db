@@ -109,7 +109,7 @@ pub async fn initdb<E: Executor>(db: &mut E) -> () {
          checkTimeEt text,
          death integer,
          hospitalized integer,
-         dateChecked integer,
+         dateChecked text,
          totalTestsViral integer,
          positiveTestsViral integer,
          negativeTestsViral integer,
@@ -134,6 +134,19 @@ pub async fn initdb<E: Executor>(db: &mut E) -> () {
          grade text
          )",
         "create unique index covid19tracking_uniq_idx on covid19tracking (date_julian, state)",
+        "create view covid19tracking_us as select date, date_julian, date_year, date_month, date_day,
+        sum(positive) as positive, sum(negative) as negative, sum(pending) as pending,
+        sum(hospitalizedCurrently) as hospitalizedCurrently, sum(hospitalizedCumulative) as hospitalizedCumulative,
+        sum(incluCurrently) as inclueCurrently, sum(incluCumulative) as incluCumulative,
+        sum(onVentilatorCurrently) as onVentilatorCurrently, sum(onVentilatorCumulative) as onVentilatorCumulative,
+        sum(recovered) as recovered, sum(death) as death, sum(hospitalized) as hospitalized,
+        sum(totalTestsViral) as totalTestsViral, sum(positiveTestsViral) as positiveTestsViral,
+        sum(negativeTestsViral) as negativeTestsViral, sum(positiveCasesViral) as positiveCasesViral,
+        sum(deathConfirmed) as deathConfirmed, sum(deathProbable) as deathProbable,
+        sum(positiveIncrease) as positiveIncrease, sum(negativeIncrease) as negativeIncrease,
+        sum(total) as total, sum(totalTestResults) as totalTestResults,
+        sum(totalTestresultsIncrease) as totalTestsResultsIncrease, sum(posNeg) as posNeg,
+        sum(deathIncrease) as deathIncrease, sum(hospitalizedIncrease) as hospitalizedIncrease from covid19tracking group by(date)",
         //
         // From https://github.com/cipriancraciun/covid19-datasets/blob/master/exports/combined/v1/values-sqlite.db.gz
         //
