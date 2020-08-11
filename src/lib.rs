@@ -1,3 +1,6 @@
+/*! COVID-19 database library
+ */
+
 /*
 
 Copyright (c) 2019-2020 John Goerzen

@@ -8,7 +8,7 @@ The program in this library can be run on your machine to download data from the
 
 # Download the database
 
-You can download a compressed database for yourself here: [covid19.zip](https://github.com/jgoerzen/covid19db/releases/download/v0.1.0/covid19.zip).
+You can download a compressed database for yourself here: [covid19.zip](https://github.com/jgoerzen/covid19db/releases/download/v0.1.0/covid19db.zip).
 
 This file is automatically regenerated daily.
 
