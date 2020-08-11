@@ -6,7 +6,9 @@ The program in this library can be run on your machine to download data from the
 
 # Included data and sources
 
-You can find a complete database schema in [dbschema.rs](src/dbschema.rs).  
+You can find a complete database schema in [dbschema.rs](src/dbschema.rs).  A Rust API for `sqlx` is also provided for select tables.
+
+- cdataset is 
 
 You can find det
 
