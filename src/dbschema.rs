@@ -19,6 +19,7 @@ Copyright (c) 2020 John Goerzen
 use sqlx::prelude::*;
 
 mod cdataset;
+mod rtlive;
 
 pub use crate::dbschema::cdataset::*;
 
@@ -60,11 +61,11 @@ pub async fn initdb<E: Executor>(db: &mut E) -> () {
         //
         "create table rtlive(
          date text not null,
-         state text not null,
          date_julian integer not null,
          date_year integer not null,
          date_month integer not null,
          date_day integer not null,
+         state text not null,
          index integer not null,
          mean real not null,
          median real not null,
