@@ -123,7 +123,7 @@ pub async fn initdb<E: Executor>(db: &mut E) -> () {
 }
 
 /** The `CDataSet` struct represents a row in the `cdataset` table.  It is an instance
- * of `sqlx::FromRow` for the benefit of users of `sqlx::query_as`. */
+of `sqlx::FromRow` for the benefit of users of `sqlx::query_as`. */
 #[derive(PartialEq, Clone, Debug, sqlx::FromRow)]
 pub struct CDataSet {
     // from the schema
