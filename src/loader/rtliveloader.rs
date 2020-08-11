@@ -17,26 +17,31 @@ Copyright (c) 2019-2020 John Goerzen
 */
 
 pub use crate::loader::parseutil::*;
+pub use crate::dbschema::*;
+pub use crate::dateutil::*;
 use csv;
 use serde::Deserialize;
 use sqlx::Transaction;
 use std::collections::HashMap;
 use std::convert::TryFrom;
+use chrono::NaiveDate;
 
 #[derive(Debug, Deserialize, PartialEq, Clone)]
-pub struct FipsRecord {
-    pub uid: u32,
-    pub iso2: String,
-    pub iso3: String,
-    pub code3: Option<u32>,
-    pub fips: Option<u32>,
-    pub admin2: String,
-    pub province_state: String,
-    pub country_region: String,
-    pub lat: Option<f64>,
-    pub lon: Option<f64>,
-    pub combined_key: String,
-    pub population: Option<u64>,
+pub struct RTLiveRecord {
+    pub date: String,
+pub state: String,
+pub index: i64,
+pub mean: f64,
+pub median: f64,
+pub lower_80: f64,
+pub upper_80: f64,
+pub infections: f64,
+pub test_adjusted_positive: f64,
+pub test_adjusted_positive_raw: f64,
+pub tests: i64,
+pub new_tests: Option<i64>,
+pub new_cases: Option<i64>,
+pub new_deaths: Option<i64>,
 }
 
 pub fn parse_to_final<A: Iterator<Item = csv::StringRecord>>(
@@ -45,52 +50,44 @@ pub fn parse_to_final<A: Iterator<Item = csv::StringRecord>>(
     striter.filter_map(|x| rec_to_struct(&x).expect("rec_to_struct"))
 }
 
-/** Parse the CSV, loading it into the database, and returning a hashmap of fips to population.
+/** Parse the CSV, loading it into the database.
  * Will panic on parse error.  */
 pub async fn load<'a, A: std::io::Read>(
     rdr: &'a mut csv::Reader<A>,
     mut transaction: Transaction<sqlx::pool::PoolConnection<sqlx::SqliteConnection>>,
-) -> HashMap<u32, u64> {
+) {
     let recs = parse_records(rdr.byte_records());
     let finaliter = parse_to_final(recs);
-    let mut hm = HashMap::new();
+    let nd = NaiveDate::parse_from_str(rec.date, "%Y-%m-%d").unwrap();
+    let (y, m, d) = nd_to_ymd(&nd);
     for rec in finaliter {
-        match (rec.fips, rec.population) {
-            (Some(fipsi), Some(popi)) => {
-                hm.insert(fipsi, popi);
-            }
-            _ => (),
+        let dbrec = RTLive {
+            date: rec.date,
+            date_julian: nd_to_day(&nd),
+            date_year: y,
+            date_month: m,
+            date_day: d,
+            state: rec.state,
+            index: rec.index,
+            mean: rec.index,
+            median: rec.median,
+            lower_80: rec.lower_80,
+            upper_80: rec.upper_80,
+            infections: rec.infections,
+            test_adjusted_positive: rec.test_adjusted_positive,
+            test_adjusted_positive_raw: rec.test_adjusted_positive_raw,
+            tests: rec.tests,
+            new_tests: rec.new_tests,
+            new_caes: rec.new_cases,
+            new_deaths: rec.new_deaths,
+
         }
         let query =
-            sqlx::query("INSERT INTO loc_lookup VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-        query
-            .bind(i64::from(rec.uid))
-            .bind(rec.iso2)
-            .bind(rec.iso3)
-            .bind(rec.code3.map(i64::from))
-            .bind(rec.fips.map(i64::from))
-            .bind(if rec.admin2.len() == 0 {
-                None
-            } else {
-                Some(rec.admin2)
-            })
-            .bind(if rec.province_state.len() == 0 {
-                None
-            } else {
-                Some(rec.province_state)
-            })
-            .bind(rec.country_region)
-            .bind(rec.lat)
-            .bind(rec.lon)
-            .bind(rec.combined_key)
-            .bind(
-                rec.population
-                    .map(|x| i64::try_from(x).expect("population range")),
-            )
+            sqlx::query(dbrec.insertstr());
+        dbrec.bind_query(query)
             .execute(&mut transaction)
             .await
             .unwrap();
     }
     transaction.commit().await.unwrap();
-    hm
 }

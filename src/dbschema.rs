@@ -22,6 +22,7 @@ mod cdataset;
 mod rtlive;
 
 pub use crate::dbschema::cdataset::*;
+pub use crate::dbschema::rtlive::*;
 
 /** Initialize a database.  This will drop all indices and tables related to
 this project, then re-create them, thus emptying them and readying them to

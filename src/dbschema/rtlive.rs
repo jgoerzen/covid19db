@@ -19,33 +19,32 @@ Copyright (c) 2020 John Goerzen
 use crate::dateutil::*;
 use chrono::{Datelike, NaiveDate};
 use julianday::JulianDay;
-use sqlx::prelude::*;
+use serde::Deserialize;
 use sqlx::Query;
-use std::convert::{TryFrom, TryInto};
+use std::convert::TryFrom;
 
 /** The `RTLive` struct represents a row in the `rtlive` table.  It is an instance
 of `sqlx::FromRow` for the benefit of users of `sqlx::query_as`. */
-#[derive(PartialEq, Clone, Debug, sqlx::FromRow)]
+#[derive(PartialEq, Clone, Debug, sqlx::FromRow, Deserialize)]
 pub struct RTLive {
     pub date: String,
-pub date_julian: i32,
-pub date_year: i32,
-pub date_month: u32,
-pub date_day: u32,
-pub state: String,
-pub index: i64,
-pub mean: f64,
-pub median: f64,
-pub lower_80: f64,
-pub upper_80: f64,
-pub infections: f64,
-pub test_adjusted_positive: f64,
-pub test_adjusted_positive_raw: f64,
-pub tests: i64,
-pub new_tests: Option<i64>,
-pub new_cases: Option<i64>,
-pub new_deaths: Option<i64>,
-
+    pub date_julian: i32,
+    pub date_year: i32,
+    pub date_month: u32,
+    pub date_day: u32,
+    pub state: String,
+    pub index: i64,
+    pub mean: f64,
+    pub median: f64,
+    pub lower_80: f64,
+    pub upper_80: f64,
+    pub infections: f64,
+    pub test_adjusted_positive: f64,
+    pub test_adjusted_positive_raw: f64,
+    pub tests: i64,
+    pub new_tests: Option<i64>,
+    pub new_cases: Option<i64>,
+    pub new_deaths: Option<i64>,
 }
 
 impl RTLive {
@@ -55,23 +54,23 @@ impl RTLive {
         // sed -e 's/ *\([^ ]*\).*/.bind(self.\1)/'
         query
             .bind(self.date)
-.bind(self.state)
-.bind(self.date_julian)
-.bind(self.date_year)
-.bind(i32::try_from(self.date_month).unwrap())
-.bind(i32::try_from(self.date_day).unwrap())
-.bind(self.index)
-.bind(self.mean)
-.bind(self.median)
-.bind(self.lower_80)
-.bind(self.upper_80)
-.bind(self.infections)
-.bind(self.test_adjusted_positive)
-.bind(self.test_adjusted_positive_raw)
-.bind(self.tests)
-.bind(self.new_tests)
-.bind(self.new_cases)
-.bind(self.new_deaths)
+            .bind(self.state)
+            .bind(self.date_julian)
+            .bind(self.date_year)
+            .bind(i32::try_from(self.date_month).unwrap())
+            .bind(i32::try_from(self.date_day).unwrap())
+            .bind(self.index)
+            .bind(self.mean)
+            .bind(self.median)
+            .bind(self.lower_80)
+            .bind(self.upper_80)
+            .bind(self.infections)
+            .bind(self.test_adjusted_positive)
+            .bind(self.test_adjusted_positive_raw)
+            .bind(self.tests)
+            .bind(self.new_tests)
+            .bind(self.new_cases)
+            .bind(self.new_deaths)
     }
 
     /// Gets an INSERT INTO string representing all the values in the table.
