@@ -1,4 +1,4 @@
-/* Parser
+/* Parser - covidtracking data
 
 Copyright (c) 2019-2020 John Goerzen
 
@@ -22,6 +22,8 @@ use serde::Deserialize;
 use std::collections::HashMap;
 use std::error::Error;
 use std::fs::File;
+use sqlx::prelude::*;
+use sqlx::Transaction;
 
 #[derive(Debug, Deserialize, PartialEq, Clone)]
 pub struct LocRecord {
@@ -38,7 +40,7 @@ pub struct LocRecord {
     pub province_original: String,
     pub administrative_different: String,
     pub administrative_normalized: String,
-    pub administrative_origina: String,
+    pub administrative_original: String,
     pub region: String,
     pub subregion: String,
     pub us_state_code: String,
@@ -48,8 +50,9 @@ pub struct LocRecord {
 
 #[derive(Debug, Deserialize, PartialEq, Clone)]
 pub struct LocRec {
-    pub fips: u32,
+    pub fips: Option<u32>,
     pub population: Option<u64>,
+    pub locid: u32,
 }
 
 pub fn parse_to_final<A: Iterator<Item = csv::StringRecord>>(
@@ -68,23 +71,44 @@ pub fn parse_init_file(file: File) -> Result<csv::Reader<File>, Box<dyn Error>> 
 }
 
 /* Will panic on parse error.  */
-pub fn parse<'a, A: std::io::Read>(
+pub async fn parse<'a, A: std::io::Read>(
+    mut transaction: Transaction<sqlx::pool::PoolConnection<sqlx::SqliteConnection>>,
     fipshm: &HashMap<u32, u64>,
     rdr: &'a mut csv::Reader<A>,
 ) -> HashMap<String, LocRec> {
     let recs = parse_records(rdr.byte_records());
     let finaliter = parse_to_final(recs);
     let mut hm = HashMap::new();
+    let mut counter = 1;
     for rec in finaliter {
-        if let Some(fips) = rec.us_county_fips {
-            hm.insert(
-                rec.key,
-                LocRec {
-                    fips,
-                    population: fipshm.get(&fips).map(|x| *x),
-                },
-            );
-        }
+        let fips = rec.us_county_fips;
+        hm.insert(rec.key,
+                  LocRec {
+                      locid: counter,
+                      fips,
+                      population: fips.and_then(|f| fipshm.get(&f).map(|x| *x)),
+                  }
+                  );
+        let query = sqlx::query("INSERT INTO cdataset_loc VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        query.
+            bind(i64::from(counter))
+            .bind(rec.xtype)
+            .bind(rec.label)
+            .bind(rec.country_code)
+            .bind(rec.country_normalized)
+            .bind(rec.province_normalized)
+            .bind(rec.administrative_normalized)
+            .bind(rec.region)
+            .bind(rec.subregion)
+            .bind(rec.us_state_code)
+            .bind(rec.us_state_name)
+            .bind(rec.us_county_fips.map(i64::from))
+             .execute(&mut transaction)
+             .await
+             .unwrap();
+       
+        counter += 1;
     }
+    transaction.commit().await.unwrap();
     hm
 }

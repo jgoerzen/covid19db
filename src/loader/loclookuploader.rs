@@ -1,4 +1,4 @@
-/* Parser
+/* Parser - JHU records
 
 Copyright (c) 2019-2020 John Goerzen
 
@@ -24,7 +24,7 @@ use std::collections::HashMap;
 use std::convert::TryFrom;
 
 #[derive(Debug, Deserialize, PartialEq, Clone)]
-pub struct FipsRecord {
+pub struct LocRecord {
     pub uid: u32,
     pub iso2: String,
     pub iso3: String,
@@ -41,7 +41,7 @@ pub struct FipsRecord {
 
 pub fn parse_to_final<A: Iterator<Item = csv::StringRecord>>(
     striter: A,
-) -> impl Iterator<Item = FipsRecord> {
+) -> impl Iterator<Item = LocRecord> {
     striter.filter_map(|x| rec_to_struct(&x).expect("rec_to_struct"))
 }
 

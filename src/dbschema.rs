@@ -150,6 +150,22 @@ pub async fn initdb<E: Executor>(db: &mut E) -> () {
         sum(total) as total, sum(totalTestResults) as totalTestResults,
         sum(totalTestresultsIncrease) as totalTestsResultsIncrease, sum(posNeg) as posNeg,
         sum(deathIncrease) as deathIncrease, sum(hospitalizedIncrease) as hospitalizedIncrease from covid19tracking group by(date)",
+        // From covid19-datasets
+        //
+        "create table cdataset_loc (
+         locid integer not null primary key,
+         xtype: text not null,
+         label: text not null,
+         country_code: text not null,
+         country_normalized: text not null,
+         province_normalized: text not null,
+         administrative_normalized: text not null,
+         region: text not null,
+         subregion: text not null,
+         us_state_code: text not null,
+         us_state_name: text not null,
+         us_county_fips: integer
+         )",
         //
         // From https://github.com/cipriancraciun/covid19-datasets/blob/master/exports/combined/v1/values-sqlite.db.gz
         //
