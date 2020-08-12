@@ -19,10 +19,10 @@ Copyright (c) 2020 John Goerzen
 use sqlx::prelude::*;
 
 mod cdataset;
-mod covid19tracking;
+mod covidtracking;
 mod rtlive;
 
-pub use crate::dbschema::{cdataset::*, covid19tracking::*, rtlive::*};
+pub use crate::dbschema::{cdataset::*, covidtracking::*, rtlive::*};
 
 /** Initialize a database.  This will drop all indices and tables related to
 this project, then re-create them, thus emptying them and readying them to
@@ -35,15 +35,15 @@ pub async fn initdb<E: Executor>(db: &mut E) -> () {
         "drop view if exists cdataset",
         "drop index if exists loc_lookup_fips",
         "drop table if exists loc_lookup",
-        "drop table if exists covid19schema",
+        "drop table if exists covid19db_meta",
         "drop view if exists rtlive",
         "drop index if exists rtlive_raw_uniq_idx",
         "drop table if exists rtlive_raw",
         "drop index if exists covidtracking_uniq_idx",
         "drop table if exists covidtracking",
         "drop view if exists covidtracking_us",
-        "create table covid19schema (version integer not null, minorversion integer not null)",
-        "insert into covid19schema values (1, 0)",
+        "create table covid19db_meta (field text not null, value text not null)",
+        "insert into covid19db_meta values ('schemaver', '2')",
         //
         // From Johns Hopkins UID_ISO_FIPS_LookUp_Table.csv
         // https://github.com/CSSEGISandData/COVID-19/blob/master/csse_covid_19_data/UID_ISO_FIPS_LookUp_Table.csv

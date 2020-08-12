@@ -18,10 +18,9 @@ Copyright (c) 2020 John Goerzen
 #![allow(non_snake_case)]
 
 use crate::dateutil::*;
-use chrono::{Datelike, NaiveDate};
+use chrono::NaiveDate;
 use julianday::JulianDay;
 use sqlx::Query;
-use std::convert::TryFrom;
 
 /** The `CovidTracking` struct represents a row in the `covid19tracking` table.  It is an instance
 of `sqlx::FromRow` for the benefit of users of `sqlx::query_as`. */

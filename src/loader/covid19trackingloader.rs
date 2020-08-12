@@ -86,7 +86,6 @@ pub async fn load<'a, A: std::io::Read>(
     let finaliter = parse_to_final(recs);
     for rec in finaliter {
         let nd = NaiveDate::parse_from_str(rec.date.as_str(), "%Y%m%d").unwrap();
-        let (y, m, d) = nd_to_ymd(&nd);
         // from the schema: sed -e 's/ *\([^ ]*\).*/\1: rec.\1,/'
         let dbrec = CovidTracking {
             date_julian: nd_to_day(&nd),
