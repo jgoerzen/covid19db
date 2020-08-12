@@ -90,7 +90,7 @@ This data is used by the [Kansas COVID-19 Charts project](https://github.com/jgo
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-This repository contains only tools for obtaining data and no data itself, though the data itself may be available elsewhere on Github.  If you use the data herein, or download it, you may be required to acknowledge the source.  Here are some details:
+This repository contains only tools for obtaining data and no data itself, though the data itself may be available elsewhere on Github.  If you use the data accumulated by this program, or download it, you may be required to acknowledge the source.  Here are some details:
 
 ## cdataset - New York Times
 
