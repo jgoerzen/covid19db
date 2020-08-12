@@ -1,4 +1,4 @@
-/* Parser - covidtracking data
+/* Parser - cdataset data
 
 Copyright (c) 2019-2020 John Goerzen
 
@@ -70,7 +70,7 @@ pub fn parse_init_file(file: File) -> Result<csv::Reader<File>, Box<dyn Error>> 
 }
 
 /* Will panic on parse error.  */
-pub async fn parse<'a, A: std::io::Read>(
+pub async fn load<'a, A: std::io::Read>(
     mut transaction: Transaction<sqlx::pool::PoolConnection<sqlx::SqliteConnection>>,
     fipshm: &HashMap<u32, u64>,
     rdr: &'a mut csv::Reader<A>,
