@@ -29,7 +29,7 @@ use crate::dbschema;
 mod combinedloader;
 mod covidtrackingloader;
 mod loclookuploader;
-mod locparser;
+mod combinedlocloader;
 mod parseutil;
 mod rtliveloader;
 
@@ -111,8 +111,8 @@ pub async fn load() {
                &mut loc_file).await;
     loc_file.seek(SeekFrom::Start(0)).unwrap();
     println!("Processing {:#?}", loc_path);
-    let mut rdr = locparser::parse_init_file(loc_file).expect("Couldn't init parser");
-    let mut lochm = locparser::parse(outputpool.begin().await.unwrap(), &fipshm, &mut rdr).await;
+    let mut rdr = combinedlocloader::parse_init_file(loc_file).expect("Couldn't init parser");
+    let mut lochm = combinedlocloader::load(outputpool.begin().await.unwrap(), &fipshm, &mut rdr).await;
 
     // Sqlite Combined
 

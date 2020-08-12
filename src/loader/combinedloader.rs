@@ -18,7 +18,7 @@ Copyright (c) 2020 John Goerzen
 
 use crate::dateutil::*;
 use crate::dbschema::*;
-use crate::loader::locparser::LocRec;
+use crate::loader::combinedlocloader::LocRec;
 pub use crate::loader::parseutil::*;
 use chrono::NaiveDate;
 use sqlx::prelude::*;
