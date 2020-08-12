@@ -27,7 +27,7 @@ use tempfile::tempdir;
 
 use crate::dbschema;
 mod combinedloader;
-mod covid19trackingloader;
+mod covidtrackingloader;
 mod loclookuploader;
 mod locparser;
 mod parseutil;
@@ -72,9 +72,9 @@ pub async fn load() {
     let mut rdr = parseutil::parse_init_file(csse_fips_file).expect("Couldn't init parser");
     let fipshm = loclookuploader::load(&mut rdr, outputpool.begin().await.unwrap()).await;
 
-    // covid19tracking
+    // covidtracking
 
-    let path = tmp_path.join("covid19tracking.csv");
+    let path = tmp_path.join("covidtracking.csv");
     let mut file = stdoptions.open(&path).unwrap();
     println!("Downloading {:#?}", path);
     downloadto(
@@ -85,7 +85,7 @@ pub async fn load() {
     file.seek(SeekFrom::Start(0)).unwrap();
     println!("Processing {:#?}", path);
     let mut rdr = parseutil::parse_init_file(file).expect("Couldn't init parser");
-    covid19trackingloader::load(&mut rdr, outputpool.begin().await.unwrap()).await;
+    covidtrackingloader::load(&mut rdr, outputpool.begin().await.unwrap()).await;
 
     // rt.live
 
