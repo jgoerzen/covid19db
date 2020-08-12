@@ -19,11 +19,10 @@ Copyright (c) 2019-2020 John Goerzen
 pub use crate::loader::parseutil::*;
 use csv;
 use serde::Deserialize;
+use sqlx::Transaction;
 use std::collections::HashMap;
 use std::error::Error;
 use std::fs::File;
-use sqlx::prelude::*;
-use sqlx::Transaction;
 
 #[derive(Debug, Deserialize, PartialEq, Clone)]
 pub struct LocRecord {
@@ -82,16 +81,18 @@ pub async fn parse<'a, A: std::io::Read>(
     let mut counter = 1;
     for rec in finaliter {
         let fips = rec.us_county_fips;
-        hm.insert(rec.key,
-                  LocRec {
-                      locid: counter,
-                      fips,
-                      population: fips.and_then(|f| fipshm.get(&f).map(|x| *x)),
-                  }
-                  );
-        let query = sqlx::query("INSERT INTO cdataset_loc VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-        query.
-            bind(i64::from(counter))
+        hm.insert(
+            rec.key,
+            LocRec {
+                locid: counter,
+                fips,
+                population: fips.and_then(|f| fipshm.get(&f).map(|x| *x)),
+            },
+        );
+        let query =
+            sqlx::query("INSERT INTO cdataset_loc VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        query
+            .bind(i64::from(counter))
             .bind(rec.xtype)
             .bind(rec.label)
             .bind(rec.country_code)
@@ -103,10 +104,10 @@ pub async fn parse<'a, A: std::io::Read>(
             .bind(rec.us_state_code)
             .bind(rec.us_state_name)
             .bind(rec.us_county_fips.map(i64::from))
-             .execute(&mut transaction)
-             .await
-             .unwrap();
-       
+            .execute(&mut transaction)
+            .await
+            .unwrap();
+
         counter += 1;
     }
     transaction.commit().await.unwrap();

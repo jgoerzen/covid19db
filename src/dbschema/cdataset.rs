@@ -17,11 +17,9 @@ Copyright (c) 2020 John Goerzen
 */
 
 use crate::dateutil::*;
-use chrono::{Datelike, NaiveDate};
+use chrono::NaiveDate;
 use julianday::JulianDay;
-use sqlx::prelude::*;
 use sqlx::Query;
-use std::convert::{TryFrom, TryInto};
 
 /** The `CDataSet` struct represents a row in the `cdataset` table.  It is an instance
 of `sqlx::FromRow` for the benefit of users of `sqlx::query_as`. */
@@ -31,18 +29,9 @@ pub struct CDataSet {
     // sed -e 's/ *\([^ ]*\)/pub \1:/' -e 's/integer not null/i64/' -e "s/text not null/String/" -e "s/text,/Option<String>,/" -e 's/real,/Option<f64>,/' -e 's/integer,/Option<i64>,/'
     //
     pub dataset: String,
-    pub location_key: String,
-    pub location_type: String,
-    pub location_label: String,
-    pub country_code: Option<String>,
-    pub country: Option<String>,
-    pub province: Option<String>,
-    pub administrative: Option<String>,
-    pub region: Option<String>,
-    pub subregion: Option<String>,
+    pub locid: i64,
     pub location_lat: Option<f64>,
     pub location_long: Option<f64>,
-    pub us_county_fips: Option<i64>,
     pub date_julian: i32,
     pub day_index_0: i32,
     pub day_index_1: i32,
@@ -93,18 +82,9 @@ impl CDataSet {
         // sed -e 's/ *\([^ ]*\).*/.bind(self.\1)/'
         query
             .bind(self.dataset)
-            .bind(self.location_key)
-            .bind(self.location_type)
-            .bind(self.location_label)
-            .bind(self.country_code)
-            .bind(self.country)
-            .bind(self.province)
-            .bind(self.administrative)
-            .bind(self.region)
-            .bind(self.subregion)
+            .bind(self.locid)
             .bind(self.location_lat)
             .bind(self.location_long)
-            .bind(self.us_county_fips)
             .bind(self.date_julian)
             .bind(self.day_index_0)
             .bind(self.day_index_1)
@@ -150,7 +130,7 @@ impl CDataSet {
 
     /// Gets an INSERT INTO string representing all the values in the table.
     pub fn insert_str() -> &'static str {
-        "INSERT INTO cdataset_raw VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+        "INSERT INTO cdataset_raw VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
     }
 
     /// Zeroes out the delta parameters so that this can reflect a duplicate day

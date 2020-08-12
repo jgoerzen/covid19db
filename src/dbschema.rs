@@ -24,7 +24,6 @@ mod rtlive;
 
 pub use crate::dbschema::{cdataset::*, covid19tracking::*, rtlive::*};
 
-
 /** Initialize a database.  This will drop all indices and tables related to
 this project, then re-create them, thus emptying them and readying them to
 receive data. */
@@ -32,6 +31,7 @@ pub async fn initdb<E: Executor>(db: &mut E) -> () {
     let statements = vec![
         "drop index if exists cdataset_raw_uniq_idx",
         "drop table if exists cdataset_raw",
+        "drop table if exists cdataset_loc",
         "drop view if exists cdataset",
         "drop index if exists loc_lookup_fips",
         "drop table if exists loc_lookup",
@@ -154,35 +154,26 @@ pub async fn initdb<E: Executor>(db: &mut E) -> () {
         //
         "create table cdataset_loc (
          locid integer not null primary key,
-         xtype: text not null,
-         label: text not null,
-         country_code: text not null,
-         country_normalized: text not null,
-         province_normalized: text not null,
-         administrative_normalized: text not null,
-         region: text not null,
-         subregion: text not null,
-         us_state_code: text not null,
-         us_state_name: text not null,
-         us_county_fips: integer
+         xtype text not null,
+         label text not null,
+         country_code text not null,
+         country_normalized text not null,
+         province_normalized text not null,
+         administrative_normalized text not null,
+         region text not null,
+         subregion text not null,
+         us_state_code text,
+         us_state_name text,
+         us_county_fips integer
          )",
         //
         // From https://github.com/cipriancraciun/covid19-datasets/blob/master/exports/combined/v1/values-sqlite.db.gz
         //
         "create table cdataset_raw (
         dataset text not null,
-        location_key text not null,
-        location_type text not null,
-        location_label text not null,
-        country_code text,
-        country text,
-        province text,
-        administrative text,
-        region text,
-        subregion text,
+        locid integer not null,
         location_lat real,
         location_long real,
-        us_county_fips integer,
         date_julian integer not null,
         day_index_0 integer not null,
         day_index_1 integer not null,
@@ -225,12 +216,21 @@ pub async fn initdb<E: Executor>(db: &mut E) -> () {
         factbook_death_rate real,
         factbook_median_age real
         )",
-        "CREATE UNIQUE INDEX cdataset_raw_uniq_idx ON cdataset_raw (dataset, location_key, date_julian)",
+        "CREATE UNIQUE INDEX cdataset_raw_uniq_idx ON cdataset_raw (dataset, locid, date_julian)",
     ];
 
     let views = vec![
         format!("CREATE VIEW cdataset AS select {} AS date, {} as date_year, {} as date_month, {} as date_day,
-                 cdataset_raw.* FROM cdataset_raw",
+                 cdataset_loc.xtype AS location_type,
+                 cdataset_loc.label AS location_label,
+                 cdataset_loc.country_code AS country_code,
+                 cdataset_loc.country_normalized AS country,
+                 cdataset_loc.province_normalized AS province,
+                 cdataset_loc.administrative_normalized AS administrative,
+                 cdataset_loc.region AS region,
+                 cdataset_loc.subregion AS subregion,
+                 cdataset_loc.us_county_fips AS us_county_fips,
+                 cdataset_raw.* FROM cdataset_raw, cdataset_loc WHERE cdataset_raw.locid = cdataset_loc.locid",
                 querystr_jd_to_datestr("cdataset_raw.date_julian"),
                 querystr_jd_to_year("cdataset_raw.date_julian"),
                 querystr_jd_to_month("cdataset_raw.date_julian"),
@@ -240,7 +240,6 @@ pub async fn initdb<E: Executor>(db: &mut E) -> () {
 
     let mut queries: Vec<String> = statements.into_iter().map(String::from).collect();
     queries.extend(views);
-
 
     for query in queries {
         println!("PREP: executing {}", query);

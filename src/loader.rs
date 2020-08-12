@@ -54,7 +54,7 @@ pub async fn load() {
 
     println!("Initializing output database");
     let mut outputpool = SqlitePool::builder()
-        .max_size(5)
+        .max_size(1)
         .build("sqlite::covid19.db")
         .await
         .expect("Error building output sqlite");
@@ -112,7 +112,7 @@ pub async fn load() {
     loc_file.seek(SeekFrom::Start(0)).unwrap();
     println!("Processing {:#?}", loc_path);
     let mut rdr = locparser::parse_init_file(loc_file).expect("Couldn't init parser");
-    let lochm = locparser::parse(&fipshm, &mut rdr);
+    let mut lochm = locparser::parse(outputpool.begin().await.unwrap(), &fipshm, &mut rdr).await;
 
     // Sqlite Combined
 
@@ -133,8 +133,15 @@ pub async fn load() {
         .build(format!("sqlite::{}", combined_path.to_str().unwrap()).as_ref())
         .await
         .expect("Error building");
-    combinedloader::load(&mut inputpool, &mut outputpool, &lochm, &fipshm).await;
+    combinedloader::load(&mut inputpool, &mut outputpool, &mut lochm, &fipshm).await;
 
+    // Started getting errors at VACUUM about statements in progress.  Drop and re-connect.
+    outputpool.close();
+    let outputpool = SqlitePool::builder()
+        .max_size(5)
+        .build("sqlite::covid19.db")
+        .await
+        .expect("Error building output sqlite");
     let mut conn = outputpool.acquire().await.unwrap();
     println!("Vacuuming");
     conn.execute("VACUUM").await.unwrap();

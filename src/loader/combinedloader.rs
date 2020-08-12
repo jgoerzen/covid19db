@@ -24,7 +24,7 @@ use chrono::NaiveDate;
 use sqlx::prelude::*;
 use sqlx::Transaction;
 use std::collections::HashMap;
-use std::convert::{TryFrom, TryInto};
+use std::convert::TryFrom;
 use std::io;
 use std::io::Write;
 use std::mem::drop;
@@ -60,7 +60,7 @@ async fn fillup(
     // If there was no last row, nothing to do.
     if let Some(lastrow) = lastrow {
         let targetmaxdate = if let Some(nextrow) = nextrow {
-            if lastrow.dataset == nextrow.dataset && lastrow.location_key == nextrow.location_key {
+            if lastrow.dataset == nextrow.dataset && lastrow.locid == nextrow.locid {
                 // If the previous row was for the same location as this one, use the date
                 // immediately prior to this row's.
                 prevdate
@@ -113,7 +113,7 @@ async fn fillup(
 pub async fn load(
     inputpool: &mut sqlx::SqlitePool,
     outputpool: &mut sqlx::SqlitePool,
-    lochm: &HashMap<String, LocRec>,
+    lochm: &mut HashMap<String, LocRec>,
     fipshm: &HashMap<u32, u64>,
 ) {
     // Speed things up a bit.
@@ -141,13 +141,66 @@ pub async fn load(
         sqlx::query("SELECT * from dataset ORDER BY dataset, location_key, date").fetch(&mut iconn);
 
     let mut lastrow = None;
+    let mut locrecsadded: u64 = 0;
 
     while let Some(row) = cursor.next().await.unwrap() {
-        let locrec = lochm.get(&row.get::<String, &str>("location_key"));
-        let fips = if let Some(loc) = locrec {
-            Some(loc.fips)
-        } else {
-            None
+        let locrec = match lochm.get(&row.get::<String, &str>("location_key")) {
+            Some(x) => x.clone(),
+            None => {
+                locrecsadded += 1;
+                let maxid: (i64,) = sqlx::query_as("SELECT MAX(locid) FROM cdataset_loc")
+                    .fetch_one(&mut transaction)
+                    .await
+                    .unwrap();
+                let query = sqlx::query(
+                    "INSERT INTO cdataset_loc VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                );
+                let locid = maxid.0 + 1;
+                let emptystr = String::from("");
+                query
+                    .bind(locid)
+                    .bind(
+                        row.get::<Option<String>, &str>("location_type")
+                            .unwrap_or(emptystr.clone()),
+                    )
+                    .bind(
+                        row.get::<Option<String>, &str>("location_label")
+                            .unwrap_or(emptystr.clone()),
+                    )
+                    .bind(
+                        row.get::<Option<String>, &str>("country_code")
+                            .unwrap_or(emptystr.clone()),
+                    )
+                    .bind(
+                        row.get::<Option<String>, &str>("country")
+                            .unwrap_or(emptystr.clone()),
+                    )
+                    .bind(
+                        row.get::<Option<String>, &str>("province")
+                            .unwrap_or(emptystr.clone()),
+                    )
+                    .bind(
+                        row.get::<Option<String>, &str>("administrative")
+                            .unwrap_or(emptystr.clone()),
+                    )
+                    .bind(
+                        row.get::<Option<String>, &str>("region")
+                            .unwrap_or(emptystr.clone()),
+                    )
+                    .bind("")
+                    .bind("")
+                    .bind(None::<Option<i64>>)
+                    .execute(&mut transaction)
+                    .await
+                    .unwrap();
+                let locrec = LocRec {
+                    fips: None,
+                    population: None,
+                    locid: u32::try_from(locid).unwrap(),
+                };
+                lochm.insert(row.get::<String, &str>("location_key"), locrec.clone());
+                locrec
+            }
         };
 
         let nd = NaiveDate::from_ymd(
@@ -159,7 +212,7 @@ pub async fn load(
 
         let population: Option<i64> = match row.get("factbook_population") {
             Some(pop) => Some(pop),
-            None => fips.and_then(|x| {
+            None => locrec.fips.and_then(|x| {
                 fipshm
                     .get(&x)
                     .and_then(|y| Some(i64::try_from(*y).unwrap()))
@@ -169,18 +222,9 @@ pub async fn load(
         let query = sqlx::query(CDataSet::insert_str());
         let cds = CDataSet {
             dataset: row.get("dataset"),
-            location_key: row.get("location_key"),
-            location_type: row.get("location_type"),
-            location_label: row.get("location_label"),
-            country_code: row.get("country_code"),
-            country: row.get("country"),
-            province: row.get("province"),
-            administrative: row.get("administrative"),
-            region: row.get("region"),
-            subregion: row.get("subregion"),
+            locid: i64::from(locrec.locid),
             location_lat: row.get("location_lat"),
             location_long: row.get("location_long"),
-            us_county_fips: fips.map(i64::from),
             date_julian: julian,
             day_index_0: row.get("day_index_0"),
             day_index_1: row.get("day_index_1"),
@@ -250,8 +294,8 @@ pub async fn load(
     }
     fillup(&mut transaction, &lastrow, None, &maxdate, &maxdate).await;
     println!(
-        "Processed {} of {} input records",
-        processedrecs, totalrecs.0
+        "Processed {} of {} input records ({} location records also added)",
+        processedrecs, totalrecs.0, locrecsadded
     );
     io::stdout().flush().unwrap();
     println!("Committing...");
