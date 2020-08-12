@@ -1,6 +1,7 @@
 # COVID-19 Database for Research and Analysis
 
 ![build](https://github.com/jgoerzen/covid19db/workflows/build/badge.svg) ![tests](https://github.com/jgoerzen/covid19db/workflows/tests/badge.svg)
+![docs](https://docs.rs/covid19db/badge.svg)
 
 This repository contains tools to generate a COVID-19 database for research and analysis, and links to a pre-generated database.  The database is a self-contained [Sqlite](https://www.sqlite.org/) database which can be used on any platform.
 

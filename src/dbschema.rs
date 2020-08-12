@@ -38,6 +38,7 @@ pub async fn initdb<E: Executor>(db: &mut E) -> () {
         "drop table if exists rtlive",
         "drop index if exists covid19tracking_uniq_idx",
         "drop table if exists covid19tracking",
+        "drop view if exists covid19tracking_us",
         "create table covid19schema (version integer not null, minorversion integer not null)",
         "insert into covid19schema values (1, 0)",
         //
