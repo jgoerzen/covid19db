@@ -169,7 +169,6 @@ pub async fn load(
         let query = sqlx::query(CDataSet::insert_str());
         let cds = CDataSet {
             dataset: row.get("dataset"),
-            data_key: row.get("data_key"),
             location_key: row.get("location_key"),
             location_type: row.get("location_type"),
             location_label: row.get("location_label"),

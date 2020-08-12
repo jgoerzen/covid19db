@@ -31,7 +31,6 @@ pub struct CDataSet {
     // sed -e 's/ *\([^ ]*\)/pub \1:/' -e 's/integer not null/i64/' -e "s/text not null/String/" -e "s/text,/Option<String>,/" -e 's/real,/Option<f64>,/' -e 's/integer,/Option<i64>,/'
     //
     pub dataset: String,
-    pub data_key: String,
     pub location_key: String,
     pub location_type: String,
     pub location_label: String,
@@ -98,7 +97,6 @@ impl CDataSet {
         // From the schema
         CDataSet {
             dataset: row.get("dataset"),
-            data_key: row.get("data_key"),
             location_key: row.get("location_key"),
             location_type: row.get("location_type"),
             location_label: row.get("location_label"),
@@ -165,7 +163,6 @@ impl CDataSet {
         // sed -e 's/ *\([^ ]*\).*/.bind(self.\1)/'
         query
             .bind(self.dataset)
-            .bind(self.data_key)
             .bind(self.location_key)
             .bind(self.location_type)
             .bind(self.location_label)
@@ -227,7 +224,7 @@ impl CDataSet {
 
     /// Gets an INSERT INTO string representing all the values in the table.
     pub fn insert_str() -> &'static str {
-        "INSERT INTO cdataset VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+        "INSERT INTO cdataset_raw VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
     }
 
     /// Zeroes out the delta parameters so that this can reflect a duplicate day
@@ -259,7 +256,6 @@ impl CDataSet {
         self.date_year = nd.year();
         self.date_month = nd.month();
         self.date_day = nd.day();
-        self.data_key = format!("{}-{}", self.data_key, julian);
     }
 
     #[allow(dead_code)]

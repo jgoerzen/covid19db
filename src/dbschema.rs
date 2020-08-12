@@ -24,13 +24,14 @@ mod rtlive;
 
 pub use crate::dbschema::{cdataset::*, covid19tracking::*, rtlive::*};
 
+
 /** Initialize a database.  This will drop all indices and tables related to
 this project, then re-create them, thus emptying them and readying them to
 receive data. */
 pub async fn initdb<E: Executor>(db: &mut E) -> () {
     let statements = vec![
-        "drop index if exists cdataset_uniq_idx",
-        "drop table if exists cdataset",
+        "drop index if exists cdataset_raw_uniq_idx",
+        "drop table if exists cdataset_raw",
         "drop index if exists loc_lookup_fips",
         "drop table if exists loc_lookup",
         "drop table if exists covid19schema",
@@ -151,9 +152,8 @@ pub async fn initdb<E: Executor>(db: &mut E) -> () {
         //
         // From https://github.com/cipriancraciun/covid19-datasets/blob/master/exports/combined/v1/values-sqlite.db.gz
         //
-        "create table cdataset (
+        "create table cdataset_raw (
         dataset text not null,
-        data_key text not null,
         location_key text not null,
         location_type text not null,
         location_label text not null,
@@ -210,9 +210,9 @@ pub async fn initdb<E: Executor>(db: &mut E) -> () {
         factbook_area real,
         factbook_population integer,
         factbook_death_rate real,
-        factbook_median_age real,
-        primary key (data_key))",
-        "CREATE UNIQUE INDEX cdataset_uniq_idx ON cdataset (dataset, location_key, date_julian)",
+        factbook_median_age real
+        )",
+        "CREATE UNIQUE INDEX cdataset_raw_uniq_idx ON cdataset_raw (dataset, location_key, date_julian)",
     ];
 
     for statement in statements {
