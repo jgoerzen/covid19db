@@ -5,6 +5,8 @@ Major changes only; minor changes are in git commit notes.
 # v1.2.0 - 2020-08-12
 
 - An effort to reduce the size of the DB
-  - Starting size: 544MB
-  - 
+  - Starting size: 544M
+  - After removing just data_key: 447M 
+  - After removing extra date bits: 425M
+- Removed extraneous CDataSet::fromrow
 

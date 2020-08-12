@@ -32,6 +32,7 @@ pub async fn initdb<E: Executor>(db: &mut E) -> () {
     let statements = vec![
         "drop index if exists cdataset_raw_uniq_idx",
         "drop table if exists cdataset_raw",
+        "drop view if exists cdataset",
         "drop index if exists loc_lookup_fips",
         "drop table if exists loc_lookup",
         "drop table if exists covid19schema",
@@ -166,11 +167,7 @@ pub async fn initdb<E: Executor>(db: &mut E) -> () {
         location_lat real,
         location_long real,
         us_county_fips integer,
-        date text not null,
         date_julian integer not null,
-        date_year integer not null,
-        date_month integer not null,
-        date_day integer not null,
         day_index_0 integer not null,
         day_index_1 integer not null,
         day_index_10 integer,
@@ -215,9 +212,44 @@ pub async fn initdb<E: Executor>(db: &mut E) -> () {
         "CREATE UNIQUE INDEX cdataset_raw_uniq_idx ON cdataset_raw (dataset, location_key, date_julian)",
     ];
 
-    for statement in statements {
-        db.execute(statement)
+    let views = vec![
+        format!("CREATE VIEW cdataset AS select {} AS date, {} as date_year, {} as date_month, {} as date_day,
+                 cdataset_raw.* FROM cdataset_raw",
+                querystr_jd_to_datestr("cdataset_raw.date_julian"),
+                querystr_jd_to_year("cdataset_raw.date_julian"),
+                querystr_jd_to_month("cdataset_raw.date_julian"),
+                querystr_jd_to_day("cdataset_raw.date_julian"),
+        ),
+    ];
+
+    let mut queries: Vec<String> = statements.into_iter().map(String::from).collect();
+    queries.extend(views);
+
+
+    for query in queries {
+        println!("PREP: executing {}", query);
+        db.execute(query.as_str())
             .await
             .expect("Error executing statement");
     }
+}
+
+/// Returns a SQLite query string converting the Julian date to a date string for the given column
+pub fn querystr_jd_to_datestr(col: &str) -> String {
+    format!("DATE({})", col)
+}
+
+/// Returns a SQLite query string converting the Julian date to a year
+pub fn querystr_jd_to_year(col: &str) -> String {
+    format!("strftime('%Y', {})", col)
+}
+
+/// Returns a SQLite query string converting the Julian date to a month
+pub fn querystr_jd_to_month(col: &str) -> String {
+    format!("strftime('%m', {})", col)
+}
+
+/// Returns a SQLite query string converting the Julian date to a day
+pub fn querystr_jd_to_day(col: &str) -> String {
+    format!("strftime('%d', {})", col)
 }

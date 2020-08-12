@@ -35,8 +35,11 @@ mod rtliveloader;
 
 pub async fn downloadto<W: Write>(url: &str, file: &mut W) {
     let mut result = reqwest::get(url).await.unwrap();
+    // let mut counter: usize = 0;
     while let Some(chunk) = result.chunk().await.unwrap() {
+        // counter += chunk.len();
         file.write_all(chunk.as_ref()).unwrap();
+        // println!("{}", counter);
     }
 }
 
