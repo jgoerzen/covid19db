@@ -36,8 +36,9 @@ pub async fn initdb<E: Executor>(db: &mut E) -> () {
         "drop index if exists loc_lookup_fips",
         "drop table if exists loc_lookup",
         "drop table if exists covid19schema",
-        "drop index if exists rtlive_uniq_idx",
-        "drop table if exists rtlive",
+        "drop view if exists rtlive",
+        "drop index if exists rtlive_raw_uniq_idx",
+        "drop table if exists rtlive_raw",
         "drop index if exists covid19tracking_uniq_idx",
         "drop table if exists covid19tracking",
         "drop view if exists covid19tracking_us",
@@ -65,12 +66,8 @@ pub async fn initdb<E: Executor>(db: &mut E) -> () {
         // rt.live data
         // https://d14wlfuexuxgcm.cloudfront.net/covid/rt.csv
         //
-        "create table rtlive(
-         date text not null,
+        "create table rtlive_raw(
          date_julian integer not null,
-         date_year integer not null,
-         date_month integer not null,
-         date_day integer not null,
          state text not null,
          rtindex integer not null,
          mean real not null,
@@ -85,7 +82,7 @@ pub async fn initdb<E: Executor>(db: &mut E) -> () {
          new_tests integer,
          new_cases integer,
          new_deaths integer)",
-        "create index rtlive_uniq_idx on rtlive (state, date_julian)",
+        "create index rtlive_raw_uniq_idx on rtlive_raw (state, date_julian)",
         //
         // From https://covidtracking.com/api/v1/states/daily.csv
         //
@@ -236,6 +233,13 @@ pub async fn initdb<E: Executor>(db: &mut E) -> () {
                 querystr_jd_to_month("cdataset_raw.date_julian"),
                 querystr_jd_to_day("cdataset_raw.date_julian"),
         ),
+        format!("CREATE VIEW rtlive AS select {} as date, {} as date_year, {} as date_month, {} as date_day,
+                 rtlive_raw.* FROM rtlive_raw",
+                querystr_jd_to_datestr("rtlive_raw.date_julian"),
+                querystr_jd_to_year("rtlive_raw.date_julian"),
+                querystr_jd_to_month("rtlive_raw.date_julian"),
+                querystr_jd_to_day("rtlive_raw.date_julian"),
+        )
     ];
 
     let mut queries: Vec<String> = statements.into_iter().map(String::from).collect();

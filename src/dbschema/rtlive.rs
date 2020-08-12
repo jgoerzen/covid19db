@@ -17,20 +17,15 @@ Copyright (c) 2020 John Goerzen
 */
 
 use crate::dateutil::*;
-use chrono::{Datelike, NaiveDate};
+use chrono::NaiveDate;
 use julianday::JulianDay;
 use sqlx::Query;
-use std::convert::TryFrom;
 
 /** The `RTLive` struct represents a row in the `rtlive` table.  It is an instance
 of `sqlx::FromRow` for the benefit of users of `sqlx::query_as`. */
 #[derive(PartialEq, Clone, Debug, sqlx::FromRow)]
 pub struct RTLive {
-    pub date: String,
     pub date_julian: i32,
-    pub date_year: i32,
-    pub date_month: u32,
-    pub date_day: u32,
     pub state: String,
     pub rtindex: i64,
     pub mean: f64,
@@ -53,11 +48,7 @@ impl RTLive {
         // from schema
         // sed -e 's/ *\([^ ]*\).*/.bind(self.\1)/'
         query
-            .bind(self.date)
             .bind(self.date_julian)
-            .bind(self.date_year)
-            .bind(i32::try_from(self.date_month).unwrap())
-            .bind(i32::try_from(self.date_day).unwrap())
             .bind(self.state)
             .bind(self.rtindex)
             .bind(self.mean)
@@ -76,19 +67,13 @@ impl RTLive {
 
     /// Gets an INSERT INTO string representing all the values in the table.
     pub fn insert_str() -> &'static str {
-        "INSERT INTO rtlive VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+        "INSERT INTO rtlive_raw VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
     }
 
     /// Sets all date fields in the struct to appropriate representations of the
     /// given Julian date.
     pub fn set_date(&mut self, julian: i32) {
-        let jd = JulianDay::new(julian);
-        let nd = jd.to_date();
         self.date_julian = julian;
-        self.date = format!("{}", nd.format("%Y-%m-%d"));
-        self.date_year = nd.year();
-        self.date_month = nd.month();
-        self.date_day = nd.day();
     }
 
     #[allow(dead_code)]
