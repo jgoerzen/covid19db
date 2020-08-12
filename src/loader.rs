@@ -136,7 +136,7 @@ pub async fn load() {
     combinedloader::load(&mut inputpool, &mut outputpool, &mut lochm, &fipshm).await;
 
     // Started getting errors at VACUUM about statements in progress.  Drop and re-connect.
-    outputpool.close();
+    outputpool.close().await;
     let outputpool = SqlitePool::builder()
         .max_size(5)
         .build("sqlite::covid19.db")
