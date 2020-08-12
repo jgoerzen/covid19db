@@ -24,21 +24,22 @@ Please note that various included data requests or requires attribution.  Please
 
 # Included data and sources
 
-You can find a complete database schema in [dbschema.rs](src/dbschema.rs).  A Rust API for `sqlx` is also provided for select tables.  Direct source data download URLs are in [loader.rs](src/loader.rs).
+You can find a complete database schema in [dbschema.rs](src/dbschema.rs).  The views defined there are intended to be the primary way to access the database.  A Rust API for `sqlx` is also provided for select tables.  Direct source data download URLs are in [loader.rs](src/loader.rs).
 
 Here are the sources:
 
 - `cdataset` is from the [COVID-19 derived datasets](https://github.com/cipriancraciun/covid19-datasets) project, which includes data from Johns Hopkins University, the New York Times, and ECDC.  This integrates the "combined" set, so you will almost certainly want to use a `WHERE dataset='foo'` in every query so that you use only a single dataset.  `select distinct dataset from cdataset order by dataset;` will show you the available datasets.  Please see the derived datasets link above for a description of the sources and the augmentation done there.  Additional augmentation is done on reading in to this system:
-  - Counties are cross-referenced with their FIPS code, which is added to the cdataset table.
+  - Counties are cross-referenced with their FIPS code, which is added to the cdataset view.
   - A [Julian date](https://en.wikipedia.org/wiki/Julian_day) field is added for ease of computation.  It simply increases by 1 for each day, and makes date-based arithmetic simpler in many cases.
   - County populations were not previously populated, and are now done so in the `factbook_population` column using the Johns Hopkins data (see below).
   - Counties that did not previously have a population present have the per-100k people calculations performed and added.
   - The source data eliminated rows for a given dataset and location on days on which there were no new cases/deaths (all the delta values would be zero).  For ease of tabulation, those rows are added back in so a given dataseries for a given location should have a row present for every day.
   - The source data used NULL instead of 0 for deltas.  This has been corrected to 0 in these tables.
+  - Location data is pulled into a separate table, and brought back in via a view, cutting the size of the table on disk in half.
 - `loc_lookup` is from the [Johns Hopkins dataset](https://github.com/CSSEGISandData/COVID-19), the bulk of which it already included above in `cdataset`.  This table represents the [`UID_ISO_FIPS_LookUp_Table.csv`](https://github.com/CSSEGISandData/COVID-19/blob/master/csse_covid_19_data/UID_ISO_FIPS_LookUp_Table.csv) file, which contains county-level population data that is integrated into `cdataset` or can be queried separately.
 - `rtlive` is from [rt.live](https://rt.live).  Julian dates and YYYY-MM-DD dates are added to the CSV source; no other changes were made. 
-- `covid19tracking` is from the [COVID-19 Tracking Project data downloads](https://covidtracking.com/data/download).  Julian dates and Y/M/D dates are added to the CSV source; no other changes were made.
-  - The COVID Tracking Project makes a separate US file available, which aggregates data to have one row per day across the entire USA.  Instead of parsing another file, there is a view `covid19tracking_us` that uses the data in `covid19tracking` to present the same kind of view.
+- `covidtracking` is from the [COVID Tracking Project data downloads](https://covidtracking.com/data/download).  Julian dates and Y/M/D dates are added to the CSV source; no other changes were made.
+  - The COVID Tracking Project makes a separate US file available, which aggregates data to have one row per day across the entire USA.  Instead of parsing another file, there is a view `covidtracking_us` that uses the data in `covidtracking` to present the same kind of view.
 
 # Additional Resources
 
@@ -129,7 +130,7 @@ We just ask that you cite Rt.live as the source and link where appropriate.
 
 [source](https://rt.live/faq)
 
-## covid19tracking - COVID-19 Tracking Project
+## covidtracking - COVID-19 Tracking Project
 
 You are welcome to copy, distribute, and develop data and website content from The COVID Tracking Project at The Atlantic for all healthcare, medical, journalistic and non-commercial uses, including any personal, editorial, academic, or research purposes.
 

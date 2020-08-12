@@ -88,7 +88,7 @@ pub async fn load<'a, A: std::io::Read>(
         let nd = NaiveDate::parse_from_str(rec.date.as_str(), "%Y%m%d").unwrap();
         let (y, m, d) = nd_to_ymd(&nd);
         // from the schema: sed -e 's/ *\([^ ]*\).*/\1: rec.\1,/'
-        let dbrec = Covid19Tracking {
+        let dbrec = CovidTracking {
             date_julian: nd_to_day(&nd),
             state: rec.state,
             positive: rec.positive,
@@ -131,7 +131,7 @@ pub async fn load<'a, A: std::io::Read>(
             score: rec.score,
             grade: rec.grade,
         };
-        let query = sqlx::query(Covid19Tracking::insert_str());
+        let query = sqlx::query(CovidTracking::insert_str());
         dbrec
             .bind_query(query)
             .execute(&mut transaction)

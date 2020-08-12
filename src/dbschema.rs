@@ -229,7 +229,7 @@ pub async fn initdb<E: Executor>(db: &mut E) -> () {
                 querystr_jd_to_year("covidtracking_raw.date_julian"),
                 querystr_jd_to_month("covidtracking_raw.date_julian"),
                 querystr_jd_to_day("covidtracking_raw.date_julian"),
-        )
+        ),
         String::from("create view covidtracking_us as select date, date_julian, date_year, date_month, date_day,
         sum(positive) as positive, sum(negative) as negative, sum(pending) as pending,
         sum(hospitalizedCurrently) as hospitalizedCurrently, sum(hospitalizedCumulative) as hospitalizedCumulative,
