@@ -10,5 +10,6 @@ Major changes only; minor changes are in git commit notes.
   - After removing extra date bits from cdataset: 425M
   - After moving cdataset locations to cdataset_loc: 235M
   - After removing extra date bits from rtlive: no change
+  - After removing extra data bits from covid19tracking
 - Removed extraneous CDataSet::fromrow
 

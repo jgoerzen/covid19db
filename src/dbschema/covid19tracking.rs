@@ -80,11 +80,7 @@ impl Covid19Tracking {
         // from schema
         // sed -e 's/ *\([^ ]*\).*/.bind(self.\1)/'
         query
-            .bind(self.date)
             .bind(self.date_julian)
-            .bind(self.date_year)
-            .bind(i32::try_from(self.date_month).unwrap())
-            .bind(i32::try_from(self.date_day).unwrap())
             .bind(self.state)
             .bind(self.positive)
             .bind(self.negative)
@@ -129,19 +125,13 @@ impl Covid19Tracking {
 
     /// Gets an INSERT INTO string representing all the values in the table.
     pub fn insert_str() -> &'static str {
-        "INSERT INTO covid19tracking VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+        "INSERT INTO covidtracking_raw VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
     }
 
     /// Sets all date fields in the struct to appropriate representations of the
     /// given Julian date.
     pub fn set_date(&mut self, julian: i32) {
-        let jd = JulianDay::new(julian);
-        let nd = jd.to_date();
         self.date_julian = julian;
-        self.date = format!("{}", nd.format("%Y-%m-%d"));
-        self.date_year = nd.year();
-        self.date_month = nd.month();
-        self.date_day = nd.day();
     }
 
     #[allow(dead_code)]

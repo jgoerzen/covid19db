@@ -39,9 +39,9 @@ pub async fn initdb<E: Executor>(db: &mut E) -> () {
         "drop view if exists rtlive",
         "drop index if exists rtlive_raw_uniq_idx",
         "drop table if exists rtlive_raw",
-        "drop index if exists covid19tracking_uniq_idx",
-        "drop table if exists covid19tracking",
-        "drop view if exists covid19tracking_us",
+        "drop index if exists covidtracking_uniq_idx",
+        "drop table if exists covidtracking",
+        "drop view if exists covidtracking_us",
         "create table covid19schema (version integer not null, minorversion integer not null)",
         "insert into covid19schema values (1, 0)",
         //
@@ -86,12 +86,8 @@ pub async fn initdb<E: Executor>(db: &mut E) -> () {
         //
         // From https://covidtracking.com/api/v1/states/daily.csv
         //
-        "create table covid19tracking (
-         date text not null,
+        "create table covidtracking_raw (
          date_julian integer not null,
-         date_year integer not null,
-         date_month integer not null,
-         date_day integer not null,
          state text not null,
          positive integer,
          negative integer,
@@ -133,20 +129,7 @@ pub async fn initdb<E: Executor>(db: &mut E) -> () {
          score integer,
          grade text
          )",
-        "create unique index covid19tracking_uniq_idx on covid19tracking (date_julian, state)",
-        "create view covid19tracking_us as select date, date_julian, date_year, date_month, date_day,
-        sum(positive) as positive, sum(negative) as negative, sum(pending) as pending,
-        sum(hospitalizedCurrently) as hospitalizedCurrently, sum(hospitalizedCumulative) as hospitalizedCumulative,
-        sum(incluCurrently) as inclueCurrently, sum(incluCumulative) as incluCumulative,
-        sum(onVentilatorCurrently) as onVentilatorCurrently, sum(onVentilatorCumulative) as onVentilatorCumulative,
-        sum(recovered) as recovered, sum(death) as death, sum(hospitalized) as hospitalized,
-        sum(totalTestsViral) as totalTestsViral, sum(positiveTestsViral) as positiveTestsViral,
-        sum(negativeTestsViral) as negativeTestsViral, sum(positiveCasesViral) as positiveCasesViral,
-        sum(deathConfirmed) as deathConfirmed, sum(deathProbable) as deathProbable,
-        sum(positiveIncrease) as positiveIncrease, sum(negativeIncrease) as negativeIncrease,
-        sum(total) as total, sum(totalTestResults) as totalTestResults,
-        sum(totalTestresultsIncrease) as totalTestsResultsIncrease, sum(posNeg) as posNeg,
-        sum(deathIncrease) as deathIncrease, sum(hospitalizedIncrease) as hospitalizedIncrease from covid19tracking group by(date)",
+        "create unique index covidtracking_raw_uniq_idx on covidtracking_raw (date_julian, state)",
         // From covid19-datasets
         //
         "create table cdataset_loc (
@@ -239,7 +222,27 @@ pub async fn initdb<E: Executor>(db: &mut E) -> () {
                 querystr_jd_to_year("rtlive_raw.date_julian"),
                 querystr_jd_to_month("rtlive_raw.date_julian"),
                 querystr_jd_to_day("rtlive_raw.date_julian"),
+        ),
+        format!("CREATE VIEW covidtracking AS select {} as date, {} as date_year, {} as date_monty, {} as date_day,
+                 covidtracking_raw.* from covidtracking_raw",
+                querystr_jd_to_datestr("covidtracking_raw.date_julian"),
+                querystr_jd_to_year("covidtracking_raw.date_julian"),
+                querystr_jd_to_month("covidtracking_raw.date_julian"),
+                querystr_jd_to_day("covidtracking_raw.date_julian"),
         )
+        String::from("create view covidtracking_us as select date, date_julian, date_year, date_month, date_day,
+        sum(positive) as positive, sum(negative) as negative, sum(pending) as pending,
+        sum(hospitalizedCurrently) as hospitalizedCurrently, sum(hospitalizedCumulative) as hospitalizedCumulative,
+        sum(incluCurrently) as inclueCurrently, sum(incluCumulative) as incluCumulative,
+        sum(onVentilatorCurrently) as onVentilatorCurrently, sum(onVentilatorCumulative) as onVentilatorCumulative,
+        sum(recovered) as recovered, sum(death) as death, sum(hospitalized) as hospitalized,
+        sum(totalTestsViral) as totalTestsViral, sum(positiveTestsViral) as positiveTestsViral,
+        sum(negativeTestsViral) as negativeTestsViral, sum(positiveCasesViral) as positiveCasesViral,
+        sum(deathConfirmed) as deathConfirmed, sum(deathProbable) as deathProbable,
+        sum(positiveIncrease) as positiveIncrease, sum(negativeIncrease) as negativeIncrease,
+        sum(total) as total, sum(totalTestResults) as totalTestResults,
+        sum(totalTestresultsIncrease) as totalTestsResultsIncrease, sum(posNeg) as posNeg,
+        sum(deathIncrease) as deathIncrease, sum(hospitalizedIncrease) as hospitalizedIncrease from covidtracking group by(date)"),
     ];
 
     let mut queries: Vec<String> = statements.into_iter().map(String::from).collect();

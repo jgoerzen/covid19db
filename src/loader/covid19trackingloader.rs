@@ -90,10 +90,6 @@ pub async fn load<'a, A: std::io::Read>(
         // from the schema: sed -e 's/ *\([^ ]*\).*/\1: rec.\1,/'
         let dbrec = Covid19Tracking {
             date_julian: nd_to_day(&nd),
-            date_year: y,
-            date_month: m,
-            date_day: d,
-            date: rec.date,
             state: rec.state,
             positive: rec.positive,
             negative: rec.negative,
