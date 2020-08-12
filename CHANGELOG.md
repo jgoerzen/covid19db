@@ -2,8 +2,11 @@
 
 Major changes only; minor changes are in git commit notes.
 
-# v1.2.0 - 2020-08-12
+# v2.0.0 - 2020-08-12
 
+- Renamed covid19tracking -> covidtracking
+- Set up views over optimized tables, halving the size of the database and improving performance
+- Added this changelog
 - An effort to reduce the size of the DB
   - Starting size: 544M
   - After removing just data_key from cdataset: 447M 
