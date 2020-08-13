@@ -28,9 +28,11 @@ pub struct OWID {
     pub iso_code: Option<String>,
 pub continent: Option<String>,
 pub location: String,
-pub date_julian: i64,
-pub total_cases: f64,
-pub new_cases: f64,
+pub date_julian: i32,
+pub total_cases: Option<f64>,
+pub new_cases: Option<f64>,
+    pub total_deaths: Option<f64>,
+    pub new_deaths: Option<f64>,
 pub total_cases_per_million: Option<f64>,
 pub new_cases_per_million: Option<f64>,
 pub total_deaths_per_million: Option<f64>,
@@ -43,7 +45,7 @@ pub new_tests_per_thousand: Option<f64>,
 pub new_tests_smoothed_per_thousand: Option<f64>,
 pub tests_per_case: Option<f64>,
 pub positive_rate: Option<f64>,
-pub tests_units: Option<f64>,
+pub tests_units: Option<String>,
 pub stringency_index: Option<f64>,
 pub population: Option<f64>,
 pub population_density: Option<f64>,
@@ -73,6 +75,8 @@ impl OWID {
 .bind(self.date_julian)
 .bind(self.total_cases)
 .bind(self.new_cases)
+.bind(self.total_deaths)
+            .bind(self.new_deaths)
 .bind(self.total_cases_per_million)
 .bind(self.new_cases_per_million)
 .bind(self.total_deaths_per_million)
@@ -106,7 +110,7 @@ impl OWID {
 
     /// Gets an INSERT INTO string representing all the values in the table.
     pub fn insert_str() -> &'static str {
-        "INSERT INTO rtlive_raw VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+        "INSERT INTO owid_raw VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
     }
 
     /// Sets all date fields in the struct to appropriate representations of the

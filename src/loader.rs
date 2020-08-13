@@ -32,6 +32,7 @@ mod loclookuploader;
 mod combinedlocloader;
 mod parseutil;
 mod rtliveloader;
+mod owidloader;
 
 pub async fn downloadto<W: Write>(url: &str, file: &mut W) {
     let mut result = reqwest::get(url).await.unwrap();
@@ -86,6 +87,21 @@ pub async fn load() {
     println!("Processing {:#?}", path);
     let mut rdr = parseutil::parse_init_file(file).expect("Couldn't init parser");
     covidtrackingloader::load(&mut rdr, outputpool.begin().await.unwrap()).await;
+
+    // Our World in Data
+
+    let path = tmp_path.join("owid.csv");
+    let mut file = stdoptions.open(&path).unwrap();
+    println!("Downloading {:#?}", path);
+    downloadto(
+        "https://covid.ourworldindata.org/data/owid-covid-data.csv",
+        &mut file,
+    )
+    .await;
+    file.seek(SeekFrom::Start(0)).unwrap();
+    println!("Processing {:#?}", path);
+    let mut rdr = parseutil::parse_init_file(file).expect("Couldn't init parser");
+    owidloader::load(&mut rdr, outputpool.begin().await.unwrap()).await;
 
     // rt.live
 

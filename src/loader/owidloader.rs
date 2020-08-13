@@ -1,4 +1,4 @@
-/* Parser
+/* OWID loader
 
 Copyright (c) 2019-2020 John Goerzen
 
@@ -25,27 +25,48 @@ use serde::Deserialize;
 use sqlx::Transaction;
 
 #[derive(Debug, Deserialize, PartialEq, Clone)]
-pub struct RTLiveRecord {
-    pub date: String,
-    pub state: String,
-    pub rtindex: i64,
-    pub mean: f64,
-    pub median: f64,
-    pub lower_80: f64,
-    pub upper_80: f64,
-    pub infections: f64,
-    pub test_adjusted_positive: f64,
-    pub test_adjusted_positive_raw: f64,
-    pub positive: f64,
-    pub tests: f64,
-    pub new_tests: Option<f64>,
-    pub new_cases: Option<f64>,
+pub struct OWIDRecord {
+    pub iso_code: Option<String>,
+pub continent: Option<String>,
+pub location: String,
+pub date: String,
+pub total_cases: Option<f64>,
+pub new_cases: Option<f64>,
+    pub total_deaths: Option<f64>,
     pub new_deaths: Option<f64>,
+pub total_cases_per_million: Option<f64>,
+pub new_cases_per_million: Option<f64>,
+pub total_deaths_per_million: Option<f64>,
+pub new_deaths_per_million: Option<f64>,
+pub total_tests: Option<f64>,
+pub new_tests: Option<f64>,
+pub new_tests_smoothed: Option<f64>,
+pub total_tests_per_thousand: Option<f64>,
+pub new_tests_per_thousand: Option<f64>,
+pub new_tests_smoothed_per_thousand: Option<f64>,
+pub tests_per_case: Option<f64>,
+pub positive_rate: Option<f64>,
+pub tests_units: Option<String>,
+pub stringency_index: Option<f64>,
+pub population: Option<f64>,
+pub population_density: Option<f64>,
+pub median_age: Option<f64>,
+pub aged_65_older: Option<f64>,
+pub aged_70_older: Option<f64>,
+pub gdp_per_capita: Option<f64>,
+pub extreme_poverty: Option<f64>,
+pub cardiovasc_death_rate: Option<f64>,
+pub diabetes_prevalence: Option<f64>,
+pub female_smokers: Option<f64>,
+pub male_smokers: Option<f64>,
+pub handwashing_facilities: Option<f64>,
+pub hospital_beds_per_thousand: Option<f64>,
+pub life_expectancy: Option<f64>,
 }
 
 pub fn parse_to_final<A: Iterator<Item = csv::StringRecord>>(
     striter: A,
-) -> impl Iterator<Item = RTLiveRecord> {
+) -> impl Iterator<Item = OWIDRecord> {
     striter.filter_map(|x| rec_to_struct(&x).expect("rec_to_struct"))
 }
 
@@ -59,24 +80,45 @@ pub async fn load<'a, A: std::io::Read>(
     let finaliter = parse_to_final(recs);
     for rec in finaliter {
         let nd = NaiveDate::parse_from_str(rec.date.as_str(), "%Y-%m-%d").unwrap();
-        let dbrec = RTLive {
+        let dbrec = OWID {
             date_julian: nd_to_day(&nd),
-            state: rec.state,
-            rtindex: rec.rtindex,
-            mean: rec.mean,
-            median: rec.median,
-            lower_80: rec.lower_80,
-            upper_80: rec.upper_80,
-            infections: rec.infections,
-            test_adjusted_positive: rec.test_adjusted_positive,
-            test_adjusted_positive_raw: rec.test_adjusted_positive_raw,
-            positive: rec.positive.round() as i64,
-            tests: rec.tests.round() as i64,
-            new_tests: rec.new_tests.map(|x| x.round() as i64),
-            new_cases: rec.new_cases.map(|x| x.round() as i64),
-            new_deaths: rec.new_deaths.map(|x| x.round() as i64),
+            iso_code: rec.iso_code,
+continent: rec.continent,
+location: rec.location,
+total_cases: rec.total_cases,
+new_cases: rec.new_cases,
+            total_deaths: rec.total_deaths,
+            new_deaths: rec.new_deaths,
+total_cases_per_million: rec.total_cases_per_million,
+new_cases_per_million: rec.new_cases_per_million,
+total_deaths_per_million: rec.total_deaths_per_million,
+new_deaths_per_million: rec.new_deaths_per_million,
+total_tests: rec.total_tests,
+new_tests: rec.new_tests,
+new_tests_smoothed: rec.new_tests_smoothed,
+total_tests_per_thousand: rec.total_tests_per_thousand,
+new_tests_per_thousand: rec.new_tests_per_thousand,
+new_tests_smoothed_per_thousand: rec.new_tests_smoothed_per_thousand,
+tests_per_case: rec.tests_per_case,
+positive_rate: rec.positive_rate,
+tests_units: rec.tests_units,
+stringency_index: rec.stringency_index,
+population: rec.population,
+population_density: rec.population_density,
+median_age: rec.median_age,
+aged_65_older: rec.aged_65_older,
+aged_70_older: rec.aged_70_older,
+gdp_per_capita: rec.gdp_per_capita,
+extreme_poverty: rec.extreme_poverty,
+cardiovasc_death_rate: rec.cardiovasc_death_rate,
+diabetes_prevalence: rec.diabetes_prevalence,
+female_smokers: rec.female_smokers,
+male_smokers: rec.male_smokers,
+handwashing_facilities: rec.handwashing_facilities,
+hospital_beds_per_thousand: rec.hospital_beds_per_thousand,
+life_expectancy: rec.life_expectancy,
         };
-        let query = sqlx::query(RTLive::insert_str());
+        let query = sqlx::query(OWID::insert_str());
         dbrec
             .bind_query(query)
             .execute(&mut transaction)

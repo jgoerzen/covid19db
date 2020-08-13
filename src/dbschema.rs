@@ -21,8 +21,9 @@ use sqlx::prelude::*;
 mod cdataset;
 mod covidtracking;
 mod rtlive;
+mod owid;
 
-pub use crate::dbschema::{cdataset::*, covidtracking::*, rtlive::*};
+pub use crate::dbschema::{cdataset::*, covidtracking::*, rtlive::*, owid::*};
 
 /** Initialize a database.  This will drop all indices and tables related to
 this project, then re-create them, thus emptying them and readying them to
@@ -210,8 +211,8 @@ pub async fn initdb<E: Executor>(db: &mut E) -> () {
          continent text,
          location text not null,
          date_julian integer not null,
-         total_cases real not null,
-         new_cases real not null,
+         total_cases real,
+         new_cases real,
         total_cases_per_million real,
         new_cases_per_million real,
         total_deaths_per_million real,
@@ -224,7 +225,7 @@ pub async fn initdb<E: Executor>(db: &mut E) -> () {
         new_tests_smoothed_per_thousand real,
         tests_per_case real,
         positive_rate real,
-        tests_units real,
+        tests_units text,
         stringency_index real,
         population real,
         population_density real,
@@ -241,7 +242,7 @@ pub async fn initdb<E: Executor>(db: &mut E) -> () {
         hospital_beds_per_thousand real,
         life_expectancy real
 )",
-        "CREATE UNIQUE INDEX owid_raw_uniq_idx ON owid (date_julian, iso_code)",
+        "CREATE UNIQUE INDEX owid_raw_uniq_idx ON owid_raw (date_julian, iso_code)",
     ];
 
     let views = vec![
@@ -295,7 +296,7 @@ pub async fn initdb<E: Executor>(db: &mut E) -> () {
                  new_deaths_per_million / 10.0 AS new_deaths_per_100k,
                  total_tests_per_thousand * 100.0 AS total_tests_per_100k,
                  new_tests_per_thousand * 100.0 AS new_tests_per_100k,
-                 new_tests_smoothed_per_thousand * 100.0 AS new_tests_smoothed_per_100k FROM owid_raw",
+                 new_tests_smoothed_per_thousand * 100.0 AS new_tests_smoothed_per_100k, owid_raw.* FROM owid_raw",
                 querystr_jd_to_datestr("owid_raw.date_julian"),
                 querystr_jd_to_year("owid_raw.date_julian"),
                 querystr_jd_to_month("owid_raw.date_julian"),
