@@ -77,7 +77,8 @@ pub async fn load() {
     downloadto(
         "https://covidtracking.com/api/v1/states/daily.csv",
         &mut file,
-    ).await;
+    )
+    .await;
     file.seek(SeekFrom::Start(0)).unwrap();
     println!("Processing {:#?}", path);
     let mut rdr = parseutil::parse_init_file(file).expect("Couldn't init parser");
@@ -91,7 +92,8 @@ pub async fn load() {
     downloadto(
         "https://d14wlfuexuxgcm.cloudfront.net/covid/rt.csv",
         &mut file,
-    ).await;
+    )
+    .await;
     file.seek(SeekFrom::Start(0)).unwrap();
     println!("Processing {:#?}", path);
     let mut rdr = parseutil::parse_init_file(file).expect("Couldn't init parser");
