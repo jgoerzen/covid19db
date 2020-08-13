@@ -34,8 +34,14 @@ mod parseutil;
 mod rtliveloader;
 
 pub fn downloadto(url: &str, file: &mut File) {
-    let mut result = blocking::get(url).unwrap();
-    result.copy_to(file).unwrap();
+    let mut result = blocking::get(url);
+    if let Ok(mut r) = result {
+        r.copy_to(file).unwrap();
+    } else {
+        // tokio panic was eating the message, so print before panic
+        eprintln!("Problem downloading {}: {:?}", url, result);
+        panic!("Problem downloading");
+    }
 }
 
 /** Downloads the data and puts it in `covid19.db` in the current working directory. */
