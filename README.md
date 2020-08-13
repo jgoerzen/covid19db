@@ -56,6 +56,7 @@ These are potential future integrations:
 - https://www.cuebiq.com/visitation-insights-mobility-index/
 - https://www.google.com/covid19/mobility/
 - https://www.cdc.gov/covid-data-tracker/index.html 
+- https://ourworldindata.org/coronavirus-testing
 
 # Building your own database
 
