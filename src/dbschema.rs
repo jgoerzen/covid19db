@@ -213,6 +213,8 @@ pub async fn initdb<E: Executor>(db: &mut E) -> () {
          date_julian integer not null,
          total_cases real,
          new_cases real,
+         total_deaths real,
+         new_deaths real,
         total_cases_per_million real,
         new_cases_per_million real,
         total_deaths_per_million real,
