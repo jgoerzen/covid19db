@@ -16,12 +16,12 @@ Copyright (c) 2019-2020 John Goerzen
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-use libflate::gzip::Decoder;
-use reqwest::blocking;
+use flate2::write::GzDecoder;
+use reqwest;
 use sqlx::prelude::*;
 use sqlx::sqlite::SqlitePool;
-use std::fs::{File, OpenOptions};
-use std::io::{Seek, SeekFrom};
+use std::fs::OpenOptions;
+use std::io::{Seek, SeekFrom, Write};
 use std::mem::drop;
 use tempfile::tempdir;
 
@@ -33,9 +33,11 @@ mod locparser;
 mod parseutil;
 mod rtliveloader;
 
-pub fn downloadto(url: &str, file: &mut File) {
-    let mut result = blocking::get(url).unwrap();
-    result.copy_to(file).unwrap();
+pub async fn downloadto<W: Write>(url: &str, file: &mut W) {
+    let mut result = reqwest::get(url).await.unwrap();
+    while let Some(chunk) = result.chunk().await.unwrap() {
+        file.write_all(chunk.as_ref()).unwrap();
+    }
 }
 
 /** Downloads the data and puts it in `covid19.db` in the current working directory. */
@@ -61,7 +63,7 @@ pub async fn load() {
     let mut csse_fips_file = stdoptions.open(&csse_fips_path).unwrap();
     println!("Downloading {:#?}", csse_fips_path);
     downloadto("https://github.com/CSSEGISandData/COVID-19/raw/master/csse_covid_19_data/UID_ISO_FIPS_LookUp_Table.csv",
-               &mut csse_fips_file);
+               &mut csse_fips_file).await;
     csse_fips_file.seek(SeekFrom::Start(0)).unwrap();
     println!("Processing {:#?}", csse_fips_path);
     let mut rdr = parseutil::parse_init_file(csse_fips_file).expect("Couldn't init parser");
@@ -75,7 +77,7 @@ pub async fn load() {
     downloadto(
         "https://covidtracking.com/api/v1/states/daily.csv",
         &mut file,
-    );
+    ).await;
     file.seek(SeekFrom::Start(0)).unwrap();
     println!("Processing {:#?}", path);
     let mut rdr = parseutil::parse_init_file(file).expect("Couldn't init parser");
@@ -89,7 +91,7 @@ pub async fn load() {
     downloadto(
         "https://d14wlfuexuxgcm.cloudfront.net/covid/rt.csv",
         &mut file,
-    );
+    ).await;
     file.seek(SeekFrom::Start(0)).unwrap();
     println!("Processing {:#?}", path);
     let mut rdr = parseutil::parse_init_file(file).expect("Couldn't init parser");
@@ -101,7 +103,7 @@ pub async fn load() {
     let mut loc_file = stdoptions.open(&loc_path).unwrap();
     println!("Downloading {:#?}", loc_path);
     downloadto("https://github.com/cipriancraciun/covid19-datasets/raw/master/exports/combined/v1/locations-diff.tsv",
-               &mut loc_file);
+               &mut loc_file).await;
     loc_file.seek(SeekFrom::Start(0)).unwrap();
     println!("Processing {:#?}", loc_path);
     let mut rdr = locparser::parse_init_file(loc_file).expect("Couldn't init parser");
@@ -110,12 +112,12 @@ pub async fn load() {
     // Sqlite Combined
 
     let combined_path = tmp_path.join("values-sqlite.db");
-    let mut combined_file = stdoptions.open(&combined_path).unwrap();
+    let combined_file = stdoptions.open(&combined_path).unwrap();
     println!("Downloading and decompressing {:#?}", combined_path);
-    let mut result = blocking::get("https://github.com/cipriancraciun/covid19-datasets/raw/master/exports/combined/v1/values-sqlite.db.gz").unwrap();
-    let mut decoder = Decoder::new(&mut result).unwrap();
-    std::io::copy(&mut decoder, &mut combined_file).unwrap();
-    drop(combined_file);
+    let mut gzdecoder = GzDecoder::new(combined_file);
+    downloadto("https://github.com/cipriancraciun/covid19-datasets/raw/master/exports/combined/v1/values-sqlite.db.gz",
+               &mut gzdecoder).await;
+    drop(gzdecoder);
     println!(
         "Processing {:#?}...  This one will take a little while...",
         combined_path
