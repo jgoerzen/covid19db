@@ -51,6 +51,11 @@ These are potential future integrations:
 - https://catalog.data.gov/dataset/covid-19-cases-summarized-by-age-group-and-gender
 - https://aws.amazon.com/data-exchange/covid-19/?cards.sort-by=item.additionalFields.order&cards.sort-order=asc
 - https://duckduckgo.com/?t=ffab&q=covid-19+data+set+by+age&ia=web
+- https://data.cdc.gov/Case-Surveillance/COVID-19-Case-Surveillance-Public-Use-Data/vbim-akqf
+- https://docs.safegraph.com/docs/social-distancing-metrics
+- https://www.cuebiq.com/visitation-insights-mobility-index/
+- https://www.google.com/covid19/mobility/
+- https://www.cdc.gov/covid-data-tracker/index.html 
 
 # Building your own database
 

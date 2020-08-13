@@ -32,15 +32,17 @@ use std::mem::drop;
 /// Calculates the absolute rate per 100k population in case it's not there
 fn set_per_pop(
     row: &sqlx::sqlite::SqliteRow,
+    colprefix: &str,
     colname: &str,
     population: Option<i64>,
 ) -> Option<f64> {
-    match row.get::<Option<f64>, &str>(format!("absolute_pop100k_{}", colname).as_str()) {
+    match row.get::<Option<f64>, &str>(format!("{}_pop100k_{}", colprefix, colname).as_str()) {
         Some(x) => Some(x),
         None => match population {
             None => None,
             Some(pop) => Some(
-                (row.get::<i64, &str>(format!("absolute_{}", colname).as_str()) as f64) * 100000.0
+                (row.get::<i64, &str>(format!("{}_{}", colprefix, colname).as_str()) as f64)
+                    * 100000.0
                     / (pop as f64),
             ),
         },
@@ -204,10 +206,10 @@ pub async fn load(
             absolute_infected: row
                 .get::<Option<i64>, &str>("absolute_infected")
                 .unwrap_or(0),
-            absolute_pop100k_confirmed: set_per_pop(&row, "confirmed", population),
-            absolute_pop100k_deaths: set_per_pop(&row, "deaths", population),
-            absolute_pop100k_recovered: set_per_pop(&row, "recovered", population),
-            absolute_pop100k_infected: set_per_pop(&row, "infected", population),
+            absolute_pop100k_confirmed: set_per_pop(&row, "absolute", "confirmed", population),
+            absolute_pop100k_deaths: set_per_pop(&row, "absolute", "deaths", population),
+            absolute_pop100k_recovered: set_per_pop(&row, "absolute", "recovered", population),
+            absolute_pop100k_infected: set_per_pop(&row, "absolute", "infected", population),
             relative_deaths: row.get("relative_deaths"),
             relative_recovered: row.get("relative_recovered"),
             relative_infected: row.get("relative_infected"),
@@ -219,10 +221,10 @@ pub async fn load(
             delta_pct_deaths: row.get("delta_pct_deaths"),
             delta_pct_recovered: row.get("delta_pct_recovered"),
             delta_pct_infected: row.get("delta_pct_infected"),
-            delta_pop100k_confirmed: row.get("delta_pop100k_confirmed"),
-            delta_pop100k_deaths: row.get("delta_pop100k_deaths"),
-            delta_pop100k_recovered: row.get("delta_pop100k_recovered"),
-            delta_pop100k_infected: row.get("delta_pop100k_infected"),
+            delta_pop100k_confirmed: set_per_pop(&row, "delta", "confirmed", population),
+            delta_pop100k_deaths: set_per_pop(&row, "delta", "deaths", population),
+            delta_pop100k_recovered: set_per_pop(&row, "delta", "recovered", population),
+            delta_pop100k_infected: set_per_pop(&row, "delta", "infected", population),
             peak_pct_confirmed: row.get("peak_pct_confirmed"),
             peak_pct_deaths: row.get("peak_pct_deaths"),
             peak_pct_recovered: row.get("peak_pct_recovered"),
