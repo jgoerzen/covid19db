@@ -23,7 +23,7 @@ jobs:
 #    - name: Run tests
 #      run: cargo test --verbose
     - name: Execute
-      run: RUST_BACKTRACE=full cargo run
+      run: RUST_BACKTRACE=full cargo run --release
     - name: Compress
       run: zip -9 covid19db.zip covid19.db
 #    - name: Create Release
