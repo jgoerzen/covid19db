@@ -23,7 +23,7 @@ jobs:
 #    - name: Run tests
 #      run: cargo test --verbose
     - name: Execute
-      run: cargo run --release
+      run: cargo run
     - name: Compress
       run: zip -9 covid19db.zip covid19.db
 #    - name: Create Release
