@@ -40,6 +40,7 @@ Here are the sources:
 - `rtlive` is from [rt.live](https://rt.live).  Julian dates and YYYY-MM-DD dates are added to the CSV source; no other changes were made. 
 - `covidtracking` is from the [COVID Tracking Project data downloads](https://covidtracking.com/data/download).  Julian dates and Y/M/D dates are added to the CSV source; no other changes were made.
   - The COVID Tracking Project makes a separate US file available, which aggregates data to have one row per day across the entire USA.  Instead of parsing another file, there is a view `covidtracking_us` that uses the data in `covidtracking` to present the same kind of view.
+- `owid` is from the [Our World in Data COVID-19 dataset](https://ourworldindata.org/coronavirus).  Julian dates and Y/M/D dates are added to the CSV source.
 
 # Additional Resources
 
@@ -137,3 +138,12 @@ You are welcome to copy, distribute, and develop data and website content from T
 The COVID Tracking Project at The Atlantic data and website content is published under a Creative Commons CC BY-NC-4.0 license, which requires users to attribute the source and license type (CC BY-NC-4.0) when sharing our data or website content. The COVID Tracking Project at The Atlantic also grants permission for any derivative use of this data and website content that supports healthcare or medical research (including institutional use by public health and for-profit organizations), or journalistic usage (by nonprofit or for-profit organizations). All other commercial uses are not permitted under the Creative Commons license, and will require permission from The COVID Tracking Project at The Atlantic.
 
 [source](https://covidtracking.com/about-data/license)
+
+## owid - Our World In Data
+
+"All our research and visualizations are free to use by everyone for all purposes." [source](https://ourworldindata.org/covid-deaths)
+
+Visualizations and text: All our charts, maps, and text is licensed under a very permissive ‘Creative Commons’ (CC) license: The CC-BY license. The BY stands for ‘by attribution’ and this means you are free to take whatever is useful for your work. You just need to provide credit to Our World in Data and our underlying sources (see below).
+
+[source](https://ourworldindata.org/how-to-use-our-world-in-data#how-is-our-work-copyrighted)
+
