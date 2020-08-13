@@ -43,6 +43,9 @@ pub async fn initdb<E: Executor>(db: &mut E) -> () {
         "drop view if exists covidtracking",
         "drop view if exists covidtracking_us",
         "drop table if exists covidtracking_raw",
+        "drop view if exists owid",
+        "drop index if exists owid_raw_uniq_idx",
+        "drop table if exists owid_raw",
         "create table covid19db_meta (field text not null, value text not null)",
         "insert into covid19db_meta values ('schemaver', '2')",
         //
@@ -131,6 +134,7 @@ pub async fn initdb<E: Executor>(db: &mut E) -> () {
          grade text
          )",
         "create unique index covidtracking_raw_uniq_idx on covidtracking_raw (date_julian, state)",
+        //
         // From covid19-datasets
         //
         "create table cdataset_loc (
@@ -198,6 +202,46 @@ pub async fn initdb<E: Executor>(db: &mut E) -> () {
         factbook_median_age real
         )",
         "CREATE UNIQUE INDEX cdataset_raw_uniq_idx ON cdataset_raw (dataset, locid, date_julian)",
+        //
+        // Our World In Data set
+        //
+        "CREATE TABLE owid_raw (
+         iso_code text,
+         continent text,
+         location text not null,
+         date_julian integer not null,
+         total_cases real not null,
+         new_cases real not null,
+        total_cases_per_million real,
+        new_cases_per_million real,
+        total_deaths_per_million real,
+        new_deaths_per_million real,
+        total_tests real,
+        new_tests real,
+        new_tests_smoothed real,
+        total_tests_per_thousand real,
+        new_tests_per_thousand real,
+        new_tests_smoothed_per_thousand real,
+        tests_per_case real,
+        positive_rate real,
+        tests_units real,
+        stringency_index real,
+        population real,
+        population_density real,
+        median_age real,
+        aged_65_older real,
+        aged_70_older real,
+        gdp_per_capita real,
+        extreme_poverty real,
+        cardiovasc_death_rate real,
+        diabetes_prevalence real,
+        female_smokers real,
+        male_smokers real,
+        handwashing_facilities real,
+        hospital_beds_per_thousand real,
+        life_expectancy real
+)",
+        "CREATE UNIQUE INDEX owid_raw_uniq_idx ON owid (date_julian, iso_code)",
     ];
 
     let views = vec![
@@ -224,7 +268,7 @@ pub async fn initdb<E: Executor>(db: &mut E) -> () {
                 querystr_jd_to_month("rtlive_raw.date_julian"),
                 querystr_jd_to_day("rtlive_raw.date_julian"),
         ),
-        format!("CREATE VIEW covidtracking AS select {} as date, {} as date_year, {} as date_monty, {} as date_day,
+        format!("CREATE VIEW covidtracking AS select {} as date, {} as date_year, {} as date_month, {} as date_day,
                  covidtracking_raw.* from covidtracking_raw",
                 querystr_jd_to_datestr("covidtracking_raw.date_julian"),
                 querystr_jd_to_year("covidtracking_raw.date_julian"),
@@ -244,6 +288,19 @@ pub async fn initdb<E: Executor>(db: &mut E) -> () {
         sum(total) as total, sum(totalTestResults) as totalTestResults,
         sum(totalTestresultsIncrease) as totalTestsResultsIncrease, sum(posNeg) as posNeg,
         sum(deathIncrease) as deathIncrease, sum(hospitalizedIncrease) as hospitalizedIncrease from covidtracking group by(date)"),
+        format!("CREATE VIEW owid AS select {} as date, {} as date_year, {} as date_month, {} as date_day,
+                 total_cases_per_million / 10.0 AS total_cases_per_100k,
+                 new_cases_per_million / 10.0 AS new_cases_per_100k,
+                 total_deaths_per_million / 10.0 AS total_deaths_per_100k,
+                 new_deaths_per_million / 10.0 AS new_deaths_per_100k,
+                 total_tests_per_thousand * 100.0 AS total_tests_per_100k,
+                 new_tests_per_thousand * 100.0 AS new_tests_per_100k,
+                 new_tests_smoothed_per_thousand * 100.0 AS new_tests_smoothed_per_100k FROM owid_raw",
+                querystr_jd_to_datestr("owid_raw.date_julian"),
+                querystr_jd_to_year("owid_raw.date_julian"),
+                querystr_jd_to_month("owid_raw.date_julian"),
+                querystr_jd_to_day("owid_raw.date_julian"),
+        ),
     ];
 
     let mut queries: Vec<String> = statements.into_iter().map(String::from).collect();
