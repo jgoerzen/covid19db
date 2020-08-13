@@ -40,8 +40,9 @@ pub async fn initdb<E: Executor>(db: &mut E) -> () {
         "drop index if exists rtlive_raw_uniq_idx",
         "drop table if exists rtlive_raw",
         "drop index if exists covidtracking_uniq_idx",
-        "drop table if exists covidtracking",
+        "drop view if exists covidtracking",
         "drop view if exists covidtracking_us",
+        "drop table if exists covidtracking_raw",
         "create table covid19db_meta (field text not null, value text not null)",
         "insert into covid19db_meta values ('schemaver', '2')",
         //
