@@ -82,6 +82,10 @@ With these commands, you can verify these results for yourself.  If you don't al
 
 It is pretty skeletal at the moment, but you can [browse the docs](https://docs.rs/covid19db/latest/covid19db/).
 
+# Database and API stability
+
+This is a rapidly-changing field and the data providers change their schemas on a fairly frequent basis.  I attempt to mitigate impacts.  If you avoid things like `SELECT *` and instead name your columns explicitly you will minimize the impact on yourself in the event of API changes.
+
 # Users
 
 This data is used by the [Kansas COVID-19 Charts project](https://github.com/jgoerzen/covid19ks) and perhaps others.

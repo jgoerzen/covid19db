@@ -51,6 +51,18 @@ pub struct CovidTracking {
     pub positiveCasesViral: Option<i64>,
     pub deathConfirmed: Option<i64>,
     pub deathProbable: Option<i64>,
+    pub totalTestEncountersViral: Option<i64>,
+    pub totalTestsPeopleViral: Option<i64>,
+    pub totalTestsAntibody: Option<i64>,
+    pub positiveTestsAntibody: Option<i64>,
+    pub negativeTestsAntibody: Option<i64>,
+    pub totalTestsPeopleAntibody: Option<i64>,
+    pub positiveTestsPeopleAntibody: Option<i64>,
+    pub negativeTestsPeopleAntibody: Option<i64>,
+    pub totalTestsPeopleAntigen: Option<i64>,
+    pub positiveTestsPeopleAntigen: Option<i64>,
+    pub totalTestsAntigen: Option<i64>,
+    pub positiveTestsAntigen: Option<i64>,
     pub fips: i64,
     pub positiveIncrease: Option<i64>,
     pub negativeIncrease: Option<i64>,
@@ -60,7 +72,6 @@ pub struct CovidTracking {
     pub posNeg: Option<i64>,
     pub deathIncrease: Option<i64>,
     pub hospitalizedIncrease: Option<i64>,
-    pub hash: Option<String>,
     pub commercialScore: Option<i64>,
     pub negativeRegularScore: Option<i64>,
     pub negativeScore: Option<i64>,
@@ -100,6 +111,18 @@ impl CovidTracking {
             .bind(self.positiveCasesViral)
             .bind(self.deathConfirmed)
             .bind(self.deathProbable)
+            .bind(self.totalTestEncountersViral)
+            .bind(self.totalTestsPeopleViral)
+            .bind(self.totalTestsAntibody)
+            .bind(self.positiveTestsAntibody)
+            .bind(self.negativeTestsAntibody)
+            .bind(self.totalTestsPeopleAntibody)
+            .bind(self.positiveTestsPeopleAntibody)
+            .bind(self.negativeTestsPeopleAntibody)
+            .bind(self.totalTestsPeopleAntigen)
+            .bind(self.positiveTestsPeopleAntigen)
+            .bind(self.totalTestsAntigen)
+            .bind(self.positiveTestsAntigen)
             .bind(self.fips)
             .bind(self.positiveIncrease)
             .bind(self.negativeIncrease)
@@ -109,7 +132,6 @@ impl CovidTracking {
             .bind(self.posNeg)
             .bind(self.deathIncrease)
             .bind(self.hospitalizedIncrease)
-            .bind(self.hash)
             .bind(self.commercialScore)
             .bind(self.negativeRegularScore)
             .bind(self.negativeScore)
@@ -120,7 +142,7 @@ impl CovidTracking {
 
     /// Gets an INSERT INTO string representing all the values in the table.
     pub fn insert_str() -> &'static str {
-        "INSERT INTO covidtracking_raw VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+        "INSERT INTO covidtracking_raw VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
     }
 
     /// Sets all date fields in the struct to appropriate representations of the
