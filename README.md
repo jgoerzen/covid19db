@@ -13,6 +13,10 @@ You can download a compressed database for yourself here: [covid19db.zip](https:
 
 This file is automatically regenerated daily.
 
+# Example uses
+
+This data is used in the [COVID-19 in Kansas](https://github.com/jgoerzen/covid19ks) project.  It has [graphs automatically updated daily](https://jgoerzen.github.io/covid19ks/) with a unique perspective on various data.
+
 # Using the data
 
 Besides the [Sqlite](https://www.sqlite.org/) command-line tools, here are some other tips on using the data:
