@@ -51,6 +51,23 @@ pub async fn load<'a, A: std::io::Read>(
     rdr: &'a mut csv::Reader<A>,
     mut transaction: Transaction<sqlx::pool::PoolConnection<sqlx::SqliteConnection>>,
 ) -> HashMap<u32, u64> {
+    assert_eq!(
+        vec![
+            "UID",
+            "iso2",
+            "iso3",
+            "code3",
+            "FIPS",
+            "Admin2",
+            "Province_State",
+            "Country_Region",
+            "Lat",
+            "Long_",
+            "Combined_Key",
+            "Population"
+        ],
+        rdr.headers().unwrap().iter().collect::<Vec<&str>>()
+    );
     let recs = parse_records(rdr.byte_records());
     let finaliter = parse_to_final(recs);
     let mut hm = HashMap::new();

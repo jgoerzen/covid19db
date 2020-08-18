@@ -75,6 +75,32 @@ pub async fn load<'a, A: std::io::Read>(
     fipshm: &HashMap<u32, u64>,
     rdr: &'a mut csv::Reader<A>,
 ) -> HashMap<String, LocRec> {
+    assert_eq!(
+        vec![
+            "key",
+            "key_original",
+            "type",
+            "label",
+            "country_code",
+            "country_different",
+            "country_normalized",
+            "country_original",
+            "province_different",
+            "province_normalized",
+            "province_original",
+            "administrative_different",
+            "administrative_normalized",
+            "administrative_original",
+            "region",
+            "subregion",
+            "us_state_code",
+            "us_state_name",
+            "us_county_fips",
+            "us_county_name",
+            "dataset"
+        ],
+        rdr.headers().unwrap().iter().collect::<Vec<&str>>()
+    );
     let recs = parse_records(rdr.byte_records());
     let finaliter = parse_to_final(recs);
     let mut hm = HashMap::new();

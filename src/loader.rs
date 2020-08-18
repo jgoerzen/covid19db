@@ -27,12 +27,12 @@ use tempfile::tempdir;
 
 use crate::dbschema;
 mod combinedloader;
+mod combinedlocloader;
 mod covidtrackingloader;
 mod loclookuploader;
-mod combinedlocloader;
+mod owidloader;
 mod parseutil;
 mod rtliveloader;
-mod owidloader;
 
 pub async fn downloadto<W: Write>(url: &str, file: &mut W) {
     let mut result = reqwest::get(url).await.unwrap();
@@ -128,7 +128,8 @@ pub async fn load() {
     loc_file.seek(SeekFrom::Start(0)).unwrap();
     println!("Processing {:#?}", loc_path);
     let mut rdr = combinedlocloader::parse_init_file(loc_file).expect("Couldn't init parser");
-    let mut lochm = combinedlocloader::load(outputpool.begin().await.unwrap(), &fipshm, &mut rdr).await;
+    let mut lochm =
+        combinedlocloader::load(outputpool.begin().await.unwrap(), &fipshm, &mut rdr).await;
 
     // Sqlite Combined
 

@@ -55,6 +55,26 @@ pub async fn load<'a, A: std::io::Read>(
     rdr: &'a mut csv::Reader<A>,
     mut transaction: Transaction<sqlx::pool::PoolConnection<sqlx::SqliteConnection>>,
 ) {
+    assert_eq!(
+        vec![
+            "date",
+            "region",
+            "index",
+            "mean",
+            "median",
+            "lower_80",
+            "upper_80",
+            "infections",
+            "test_adjusted_positive",
+            "test_adjusted_positive_raw",
+            "positive",
+            "tests",
+            "new_tests",
+            "new_cases",
+            "new_deaths"
+        ],
+        rdr.headers().unwrap().iter().collect::<Vec<&str>>()
+    );
     let recs = parse_records(rdr.byte_records());
     let finaliter = parse_to_final(recs);
     for rec in finaliter {

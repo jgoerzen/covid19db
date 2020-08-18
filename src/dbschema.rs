@@ -20,10 +20,10 @@ use sqlx::prelude::*;
 
 mod cdataset;
 mod covidtracking;
-mod rtlive;
 mod owid;
+mod rtlive;
 
-pub use crate::dbschema::{cdataset::*, covidtracking::*, rtlive::*, owid::*};
+pub use crate::dbschema::{cdataset::*, covidtracking::*, owid::*, rtlive::*};
 
 /** Initialize a database.  This will drop all indices and tables related to
 this project, then re-create them, thus emptying them and readying them to
@@ -224,12 +224,16 @@ pub async fn initdb<E: Executor>(db: &mut E) -> () {
          date_julian integer not null,
          total_cases real,
          new_cases real,
+         new_cases_smoothed real,
          total_deaths real,
          new_deaths real,
+         new_deaths_smoothed real,
         total_cases_per_million real,
         new_cases_per_million real,
+         new_cases_smoothed_per_million real,
         total_deaths_per_million real,
         new_deaths_per_million real,
+         new_deaths_smoothed_per_million real,
         total_tests real,
         new_tests real,
         new_tests_smoothed real,
