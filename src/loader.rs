@@ -164,5 +164,15 @@ pub async fn load() {
     conn.execute("VACUUM").await.unwrap();
     println!("Optimizing");
     conn.execute("PRAGMA OPTIMIZE").await.unwrap();
+    println!(" *** All data loaded; row counts follow:");
+    for (tablename, minrows) in vec![("cdataset", 1250000), ("covidtracking", 9000), ("loc_lookup", 4000), ("rtlive", 8000)] {
+        let rows: (i64,) = sqlx::query_as(format!("SELECT COUNT(*) FROM {}", tablename).as_str())
+            .fetch_one(&mut conn)
+            .await
+            .unwrap();
+        println!("{}: {}", tablename, rows.0);
+        assert!(rows.0 >= minrows);
+    }
     println!("Finished successfully!");
+
 }
