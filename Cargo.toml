@@ -1,6 +1,6 @@
 [package]
 name = "covid19db"
-version = "2.0.1"
+version = "2.0.2"
 authors = ["John Goerzen <jgoerzen@complete.org>"]
 edition = "2018"
 license = "GPL-3.0+"
