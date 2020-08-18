@@ -105,7 +105,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
 name = "chrono"
-version = "0.4.13"
+version = "0.4.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "num-integer 0.1.43 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -131,7 +131,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 name = "covid19db"
 version = "2.0.0"
 dependencies = [
- "chrono 0.4.13 (registry+https://github.com/rust-lang/crates.io-index)",
+ "chrono 0.4.15 (registry+https://github.com/rust-lang/crates.io-index)",
  "csv 1.1.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "flate2 1.0.16 (registry+https://github.com/rust-lang/crates.io-index)",
  "julianday 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -320,7 +320,7 @@ name = "futures-task"
 version = "0.3.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
- "once_cell 1.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "once_cell 1.4.1 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -508,7 +508,7 @@ name = "julianday"
 version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
- "chrono 0.4.13 (registry+https://github.com/rust-lang/crates.io-index)",
+ "chrono 0.4.15 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -674,7 +674,7 @@ dependencies = [
 
 [[package]]
 name = "once_cell"
-version = "1.4.0"
+version = "1.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
@@ -1003,7 +1003,7 @@ dependencies = [
  "async-stream 0.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "bitflags 1.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "byteorder 1.3.4 (registry+https://github.com/rust-lang/crates.io-index)",
- "chrono 0.4.13 (registry+https://github.com/rust-lang/crates.io-index)",
+ "chrono 0.4.15 (registry+https://github.com/rust-lang/crates.io-index)",
  "crossbeam-queue 0.2.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "crossbeam-utils 0.7.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "futures-channel 0.3.5 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -1097,7 +1097,7 @@ dependencies = [
 
 [[package]]
 name = "tinyvec"
-version = "0.3.3"
+version = "0.3.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
@@ -1211,7 +1211,7 @@ name = "unicode-normalization"
 version = "0.1.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
- "tinyvec 0.3.3 (registry+https://github.com/rust-lang/crates.io-index)",
+ "tinyvec 0.3.4 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -1391,7 +1391,7 @@ dependencies = [
 "checksum bytes 0.5.6 (registry+https://github.com/rust-lang/crates.io-index)" = "0e4cec68f03f32e44924783795810fa50a7035d8c8ebe78580ad7e6c703fba38"
 "checksum cc 1.0.58 (registry+https://github.com/rust-lang/crates.io-index)" = "f9a06fb2e53271d7c279ec1efea6ab691c35a2ae67ec0d91d7acec0caf13b518"
 "checksum cfg-if 0.1.10 (registry+https://github.com/rust-lang/crates.io-index)" = "4785bdd1c96b2a846b2bd7cc02e86b6b3dbf14e7e53446c4f54c92a361040822"
-"checksum chrono 0.4.13 (registry+https://github.com/rust-lang/crates.io-index)" = "c74d84029116787153e02106bf53e66828452a4b325cc8652b788b5967c0a0b6"
+"checksum chrono 0.4.15 (registry+https://github.com/rust-lang/crates.io-index)" = "942f72db697d8767c22d46a598e01f2d3b475501ea43d0db4f16d90259182d0b"
 "checksum core-foundation 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)" = "57d24c7a13c43e870e37c1556b74555437870a04514f7685f5b354e090567171"
 "checksum core-foundation-sys 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)" = "b3a71ab494c0b5b860bdc8407ae08978052417070c2ced38573a9157ad75b8ac"
 "checksum crc32fast 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)" = "ba125de2af0df55319f41944744ad91c71113bf74a4646efff39afe1f6842db1"
@@ -1455,7 +1455,7 @@ dependencies = [
 "checksum num-integer 0.1.43 (registry+https://github.com/rust-lang/crates.io-index)" = "8d59457e662d541ba17869cf51cf177c0b5f0cbf476c66bdc90bf1edac4f875b"
 "checksum num-traits 0.2.12 (registry+https://github.com/rust-lang/crates.io-index)" = "ac267bcc07f48ee5f8935ab0d24f316fb722d7a1292e2913f0cc196b29ffd611"
 "checksum num_cpus 1.13.0 (registry+https://github.com/rust-lang/crates.io-index)" = "05499f3756671c15885fee9034446956fff3f243d6077b91e5767df161f766b3"
-"checksum once_cell 1.4.0 (registry+https://github.com/rust-lang/crates.io-index)" = "0b631f7e854af39a1739f401cf34a8a013dfe09eac4fa4dba91e9768bd28168d"
+"checksum once_cell 1.4.1 (registry+https://github.com/rust-lang/crates.io-index)" = "260e51e7efe62b592207e9e13a68e43692a7a279171d6ba57abd208bf23645ad"
 "checksum openssl 0.10.30 (registry+https://github.com/rust-lang/crates.io-index)" = "8d575eff3665419f9b83678ff2815858ad9d11567e082f5ac1814baba4e2bcb4"
 "checksum openssl-probe 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)" = "77af24da69f9d9341038eba93a073b1fdaaa1b788221b00a69bce9e762cb32de"
 "checksum openssl-sys 0.9.58 (registry+https://github.com/rust-lang/crates.io-index)" = "a842db4709b604f0fe5d1170ae3565899be2ad3d9cbc72dedc789ac0511f78de"
@@ -1500,7 +1500,7 @@ dependencies = [
 "checksum thiserror-impl 1.0.20 (registry+https://github.com/rust-lang/crates.io-index)" = "bd80fc12f73063ac132ac92aceea36734f04a1d93c1240c6944e23a3b8841793"
 "checksum thread_local 1.0.1 (registry+https://github.com/rust-lang/crates.io-index)" = "d40c6d1b69745a6ec6fb1ca717914848da4b44ae29d9b3080cbee91d72a69b14"
 "checksum time 0.1.43 (registry+https://github.com/rust-lang/crates.io-index)" = "ca8a50ef2360fbd1eeb0ecd46795a87a19024eb4b53c5dc916ca1fd95fe62438"
-"checksum tinyvec 0.3.3 (registry+https://github.com/rust-lang/crates.io-index)" = "53953d2d3a5ad81d9f844a32f14ebb121f50b650cd59d0ee2a07cf13c617efed"
+"checksum tinyvec 0.3.4 (registry+https://github.com/rust-lang/crates.io-index)" = "238ce071d267c5710f9d31451efec16c5ee22de34df17cc05e56cbc92e967117"
 "checksum tokio 0.2.22 (registry+https://github.com/rust-lang/crates.io-index)" = "5d34ca54d84bf2b5b4d7d31e901a8464f7b60ac145a284fba25ceb801f2ddccd"
 "checksum tokio-macros 0.2.5 (registry+https://github.com/rust-lang/crates.io-index)" = "f0c3acc6aa564495a0f2e1d59fab677cd7f81a19994cfc7f3ad0e64301560389"
 "checksum tokio-socks 0.2.2 (registry+https://github.com/rust-lang/crates.io-index)" = "1997788a0e25e09300e44680ba1ef9d44d6f634a883641f80109e8b59c928daf"
