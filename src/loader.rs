@@ -91,14 +91,54 @@ pub async fn load() {
     let mut rdr = parseutil::parse_init_file(file).expect("Couldn't init parser");
     harveycotestsloader::load(&mut rdr, outputpool.begin().await.unwrap()).await;
     let mut conn = outputpool.acquire().await.unwrap();
-    assert_one_opti64(Some(51), "SELECT kdhe_neg_results FROM harveycotests WHERE date = '2020-07-19'", &mut conn).await;
-    assert_one_opti64(Some(1), "SELECT kdhe_pos_results FROM harveycotests WHERE date = '2020-07-19'", &mut conn).await;
-    assert_one_opti64(None, "SELECT harveyco_neg_results FROM harveycotests WHERE date = '2020-07-19'", &mut conn).await;
-    assert_one_opti64(None, "SELECT harveyco_pos_results FROM harveycotests WHERE date = '2020-07-19'", &mut conn).await;
-    assert_one_i64(49, "SELECT kdhe_neg_results FROM harveycotests WHERE date = '2020-08-15'", &mut conn).await;
-    assert_one_i64(22, "SELECT kdhe_pos_results FROM harveycotests WHERE date = '2020-08-15'", &mut conn).await;
-    assert_one_i64(32, "SELECT harveyco_neg_results FROM harveycotests WHERE date = '2020-08-15'", &mut conn).await;
-    assert_one_i64(4, "SELECT harveyco_pos_results FROM harveycotests WHERE date = '2020-08-15'", &mut conn).await;
+    assert_one_opti64(
+        Some(51),
+        "SELECT kdhe_neg_results FROM harveycotests WHERE date = '2020-07-19'",
+        &mut conn,
+    )
+    .await;
+    assert_one_opti64(
+        Some(1),
+        "SELECT kdhe_pos_results FROM harveycotests WHERE date = '2020-07-19'",
+        &mut conn,
+    )
+    .await;
+    assert_one_opti64(
+        None,
+        "SELECT harveyco_neg_results FROM harveycotests WHERE date = '2020-07-19'",
+        &mut conn,
+    )
+    .await;
+    assert_one_opti64(
+        None,
+        "SELECT harveyco_pos_results FROM harveycotests WHERE date = '2020-07-19'",
+        &mut conn,
+    )
+    .await;
+    assert_one_i64(
+        49,
+        "SELECT kdhe_neg_results FROM harveycotests WHERE date = '2020-08-15'",
+        &mut conn,
+    )
+    .await;
+    assert_one_i64(
+        22,
+        "SELECT kdhe_pos_results FROM harveycotests WHERE date = '2020-08-15'",
+        &mut conn,
+    )
+    .await;
+    assert_one_i64(
+        32,
+        "SELECT harveyco_neg_results FROM harveycotests WHERE date = '2020-08-15'",
+        &mut conn,
+    )
+    .await;
+    assert_one_i64(
+        4,
+        "SELECT harveyco_pos_results FROM harveycotests WHERE date = '2020-08-15'",
+        &mut conn,
+    )
+    .await;
     drop(conn);
 
     // covidtracking
@@ -193,7 +233,13 @@ pub async fn load() {
     println!("Optimizing");
     conn.execute("PRAGMA OPTIMIZE").await.unwrap();
     println!(" *** All data loaded; row counts follow:");
-    for (tablename, minrows) in vec![("cdataset", 1250000), ("covidtracking", 9000), ("loc_lookup", 4000), ("rtlive", 8000)] {
+    for (tablename, minrows) in vec![
+        ("cdataset", 1250000),
+        ("covidtracking", 9000),
+        ("loc_lookup", 4000),
+        ("rtlive", 8000),
+        ("harveycotests", 80),
+    ] {
         let rows: (i64,) = sqlx::query_as(format!("SELECT COUNT(*) FROM {}", tablename).as_str())
             .fetch_one(&mut conn)
             .await
@@ -202,5 +248,4 @@ pub async fn load() {
         assert!(rows.0 >= minrows);
     }
     println!("Finished successfully!");
-
 }

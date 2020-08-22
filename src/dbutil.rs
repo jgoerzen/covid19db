@@ -19,20 +19,20 @@ Copyright (c) 2019-2020 John Goerzen
 use sqlx::prelude::*;
 use sqlx::sqlite::SqliteRow;
 
-pub async fn assert_one_i64(expected: i64, query: &str, conn: &mut sqlx::pool::PoolConnection<sqlx::SqliteConnection>)
-{
-    let val: (i64, ) = sqlx::query_as(query)
-        .fetch_one(conn)
-        .await
-        .unwrap();
+pub async fn assert_one_i64(
+    expected: i64,
+    query: &str,
+    conn: &mut sqlx::pool::PoolConnection<sqlx::SqliteConnection>,
+) {
+    let val: (i64,) = sqlx::query_as(query).fetch_one(conn).await.unwrap();
     assert_eq!(expected, val.0);
 }
 
-pub async fn assert_one_opti64(expected: Option<i64>, query: &str, conn: &mut sqlx::pool::PoolConnection<sqlx::SqliteConnection>)
-{
-    let val: (Option<i64>, ) = sqlx::query_as(query)
-        .fetch_one(conn)
-        .await
-        .unwrap();
+pub async fn assert_one_opti64(
+    expected: Option<i64>,
+    query: &str,
+    conn: &mut sqlx::pool::PoolConnection<sqlx::SqliteConnection>,
+) {
+    let val: (Option<i64>,) = sqlx::query_as(query).fetch_one(conn).await.unwrap();
     assert_eq!(expected, val.0);
 }

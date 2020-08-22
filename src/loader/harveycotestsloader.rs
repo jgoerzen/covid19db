@@ -22,7 +22,7 @@ pub use crate::loader::parseutil::*;
 use chrono::NaiveDate;
 use csv;
 use serde::Deserialize;
-use sqlx::{Transaction, Query};
+use sqlx::{Query, Transaction};
 
 #[derive(Debug, Deserialize, PartialEq, Clone)]
 pub struct HarveyCountyRecord {
@@ -36,18 +36,19 @@ pub struct HarveyCountyRecord {
 impl HarveyCountyRecord {
     pub fn bind_query<'q>(self, query: Query<'q, sqlx::Sqlite>) -> Query<'q, sqlx::Sqlite> {
         query
-            .bind(nd_to_day(&NaiveDate::parse_from_str(self.date.as_str(), "%Y-%m-%d").unwrap()))
-                  .bind(self.kdhe_neg_results)
-                  .bind(self.kdhe_pos_results)
-                  .bind(self.harveyco_neg_results)
-                  .bind(self.harveyco_pos_results)
+            .bind(nd_to_day(
+                &NaiveDate::parse_from_str(self.date.as_str(), "%Y-%m-%d").unwrap(),
+            ))
+            .bind(self.kdhe_neg_results)
+            .bind(self.kdhe_pos_results)
+            .bind(self.harveyco_neg_results)
+            .bind(self.harveyco_pos_results)
     }
 
     pub fn insert_str() -> &'static str {
         "INSERT INTO harveycotests_raw VALUES (?, ?, ?, ?, ?)"
     }
 }
-
 
 pub fn parse_to_final<A: Iterator<Item = csv::StringRecord>>(
     striter: A,
@@ -75,8 +76,7 @@ pub async fn load<'a, A: std::io::Read>(
     let finaliter = parse_to_final(recs);
     for rec in finaliter {
         let query = sqlx::query(HarveyCountyRecord::insert_str());
-        rec
-            .bind_query(query)
+        rec.bind_query(query)
             .execute(&mut transaction)
             .await
             .unwrap();
