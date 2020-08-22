@@ -99,6 +99,7 @@ pub async fn load() {
     assert_one_i64(22, "SELECT kdhe_pos_results FROM harveycotests WHERE date = '2020-08-15'", &mut conn).await;
     assert_one_i64(32, "SELECT harveyco_neg_results FROM harveycotests WHERE date = '2020-08-15'", &mut conn).await;
     assert_one_i64(4, "SELECT harveyco_pos_results FROM harveycotests WHERE date = '2020-08-15'", &mut conn).await;
+    drop(conn);
 
     // covidtracking
 
