@@ -26,9 +26,11 @@ use std::mem::drop;
 use tempfile::tempdir;
 
 use crate::dbschema;
+use crate::dbutil::*;
 mod combinedloader;
 mod combinedlocloader;
 mod covidtrackingloader;
+mod harveycotestsloader;
 mod loclookuploader;
 mod owidloader;
 mod parseutil;
@@ -88,6 +90,8 @@ pub async fn load() {
     println!("Processing {:#?}", path);
     let mut rdr = parseutil::parse_init_file(file).expect("Couldn't init parser");
     harveycotestsloader::load(&mut rdr, outputpool.begin().await.unwrap()).await;
+    let mut conn = outputpool.acquire().await.unwrap();
+    assert_one_row(51i64, "SELECT kdhe_neg_results FROM harveycotests WHERE date = '2020-07-19'", &mut conn).await;
 
     // covidtracking
 

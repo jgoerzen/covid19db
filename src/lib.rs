@@ -22,3 +22,4 @@ Copyright (c) 2019-2020 John Goerzen
 pub mod dateutil;
 pub mod dbschema;
 pub mod loader;
+pub mod dbutil;

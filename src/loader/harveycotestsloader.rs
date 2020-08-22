@@ -22,30 +22,36 @@ pub use crate::loader::parseutil::*;
 use chrono::NaiveDate;
 use csv;
 use serde::Deserialize;
-use sqlx::Transaction;
+use sqlx::{Transaction, Query};
 
 #[derive(Debug, Deserialize, PartialEq, Clone)]
-pub struct RTLiveRecord {
+pub struct HarveyCountyRecord {
     pub date: String,
-    pub state: String,
-    pub rtindex: i64,
-    pub mean: f64,
-    pub median: f64,
-    pub lower_80: f64,
-    pub upper_80: f64,
-    pub infections: f64,
-    pub test_adjusted_positive: f64,
-    pub test_adjusted_positive_raw: f64,
-    pub positive: f64,
-    pub tests: f64,
-    pub new_tests: Option<f64>,
-    pub new_cases: Option<f64>,
-    pub new_deaths: Option<f64>,
+    pub kdhe_neg_results: Option<i64>,
+    pub kdhe_pos_results: Option<i64>,
+    pub harveyco_neg_results: Option<i64>,
+    pub harveyco_pos_results: Option<i64>,
 }
+
+impl HarveyCountyRecord {
+    pub fn bind_query<'q>(self, query: Query<'q, sqlx::Sqlite>) -> Query<'q, sqlx::Sqlite> {
+        query
+            .bind(nd_to_day(&NaiveDate::parse_from_str(self.date.as_str(), "%Y-%m-%d").unwrap()))
+                  .bind(self.kdhe_neg_results)
+                  .bind(self.kdhe_pos_results)
+                  .bind(self.harveyco_neg_results)
+                  .bind(self.harveyco_pos_results)
+    }
+
+    pub fn insert_str() -> &'static str {
+        "INSERT INTO harveycotests_raw VALUES (?, ?, ?, ?, ?)"
+    }
+}
+
 
 pub fn parse_to_final<A: Iterator<Item = csv::StringRecord>>(
     striter: A,
-) -> impl Iterator<Item = RTLiveRecord> {
+) -> impl Iterator<Item = HarveyCountyRecord> {
     striter.filter_map(|x| rec_to_struct(&x).expect("rec_to_struct"))
 }
 
@@ -58,46 +64,18 @@ pub async fn load<'a, A: std::io::Read>(
     assert_eq!(
         vec![
             "date",
-            "region",
-            "index",
-            "mean",
-            "median",
-            "lower_80",
-            "upper_80",
-            "infections",
-            "test_adjusted_positive",
-            "test_adjusted_positive_raw",
-            "positive",
-            "tests",
-            "new_tests",
-            "new_cases",
-            "new_deaths"
+            "kdhe_neg_results",
+            "kdhe_pos_results",
+            "harveyco_neg_results",
+            "harveyco_pos_results",
         ],
         rdr.headers().unwrap().iter().collect::<Vec<&str>>()
     );
     let recs = parse_records(rdr.byte_records());
     let finaliter = parse_to_final(recs);
     for rec in finaliter {
-        let nd = NaiveDate::parse_from_str(rec.date.as_str(), "%Y-%m-%d").unwrap();
-        let dbrec = RTLive {
-            date_julian: nd_to_day(&nd),
-            state: rec.state,
-            rtindex: rec.rtindex,
-            mean: rec.mean,
-            median: rec.median,
-            lower_80: rec.lower_80,
-            upper_80: rec.upper_80,
-            infections: rec.infections,
-            test_adjusted_positive: rec.test_adjusted_positive,
-            test_adjusted_positive_raw: rec.test_adjusted_positive_raw,
-            positive: rec.positive.round() as i64,
-            tests: rec.tests.round() as i64,
-            new_tests: rec.new_tests.map(|x| x.round() as i64),
-            new_cases: rec.new_cases.map(|x| x.round() as i64),
-            new_deaths: rec.new_deaths.map(|x| x.round() as i64),
-        };
-        let query = sqlx::query(RTLive::insert_str());
-        dbrec
+        let query = sqlx::query(HarveyCountyRecord::insert_str());
+        rec
             .bind_query(query)
             .execute(&mut transaction)
             .await
