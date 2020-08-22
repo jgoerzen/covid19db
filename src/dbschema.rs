@@ -33,6 +33,9 @@ pub async fn initdb<E: Executor>(db: &mut E) -> () {
         "drop index if exists cdataset_raw_uniq_idx",
         "drop table if exists cdataset_raw",
         "drop table if exists cdataset_loc",
+        "drop index if exists harveycotests_raw_uniq_idx",
+        "drop view if exists harveycotests",
+        "drop table if exists harveycotests_raw",
         "drop view if exists cdataset",
         "drop index if exists loc_lookup_fips",
         "drop table if exists loc_lookup",
@@ -88,6 +91,13 @@ pub async fn initdb<E: Executor>(db: &mut E) -> () {
          new_cases integer,
          new_deaths integer)",
         "create index rtlive_raw_uniq_idx on rtlive_raw (state, date_julian)",
+        // Harvey County data
+        "create table harveycotests_raw(
+         date_julian integer not null primary key,
+         kdhe_neg_results,
+         kdhe_post_results,
+         harveyco_neg_results,
+         harveyco_pos_results)",
         //
         // From https://covidtracking.com/api/v1/states/daily.csv
         //
@@ -278,6 +288,15 @@ pub async fn initdb<E: Executor>(db: &mut E) -> () {
                 querystr_jd_to_year("cdataset_raw.date_julian"),
                 querystr_jd_to_month("cdataset_raw.date_julian"),
                 querystr_jd_to_day("cdataset_raw.date_julian"),
+        ),
+        format!("CREATE VIEW harveycotests AS select {} as date, {} as date_year, {} as date_month, {} as date_day,
+                 34429 as population, kdhe_neg_results + kdhe_pos_results AS kdhe_tot_results,
+                 harveyco_neg_results + harveyco_pos_results AS harveyco_tot_results,
+                 harveycotests_raw.* FROM harveycotests_raw",
+                querystr_jd_to_datestr("harveycotests_raw.date_julian"),
+                querystr_jd_to_year("harveycotests_raw.date_julian"),
+                querystr_jd_to_month("harveycotests_raw.date_julian"),
+                querystr_jd_to_day("harveycotests_raw.date_julian"),
         ),
         format!("CREATE VIEW rtlive AS select {} as date, {} as date_year, {} as date_month, {} as date_day,
                  rtlive_raw.* FROM rtlive_raw",

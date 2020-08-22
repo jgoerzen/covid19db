@@ -73,6 +73,22 @@ pub async fn load() {
     let mut rdr = parseutil::parse_init_file(csse_fips_file).expect("Couldn't init parser");
     let fipshm = loclookuploader::load(&mut rdr, outputpool.begin().await.unwrap()).await;
 
+    // Harvey County
+    //
+    // https://github.com/jgoerzen/covid19-data/raw/master/harveycotests.csv
+    let path = tmp_path.join("harveycotests.csv");
+    let mut file = stdoptions.open(&path).unwrap();
+    println!("Downloading {:#?}", path);
+    downloadto(
+        "https://github.com/jgoerzen/covid19-data/raw/master/harveycotests.csv",
+        &mut file,
+    )
+    .await;
+    file.seek(SeekFrom::Start(0)).unwrap();
+    println!("Processing {:#?}", path);
+    let mut rdr = parseutil::parse_init_file(file).expect("Couldn't init parser");
+    harveycotestsloader::load(&mut rdr, outputpool.begin().await.unwrap()).await;
+
     // covidtracking
 
     let path = tmp_path.join("covidtracking.csv");
