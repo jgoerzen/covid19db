@@ -91,7 +91,14 @@ pub async fn load() {
     let mut rdr = parseutil::parse_init_file(file).expect("Couldn't init parser");
     harveycotestsloader::load(&mut rdr, outputpool.begin().await.unwrap()).await;
     let mut conn = outputpool.acquire().await.unwrap();
-    assert_one_row(51i64, "SELECT kdhe_neg_results FROM harveycotests WHERE date = '2020-07-19'", &mut conn).await;
+    assert_one_opti64(Some(51), "SELECT kdhe_neg_results FROM harveycotests WHERE date = '2020-07-19'", &mut conn).await;
+    assert_one_opti64(Some(1), "SELECT kdhe_pos_results FROM harveycotests WHERE date = '2020-07-19'", &mut conn).await;
+    assert_one_opti64(None, "SELECT harveyco_neg_results FROM harveycotests WHERE date = '2020-07-19'", &mut conn).await;
+    assert_one_opti64(None, "SELECT harveyco_pos_results FROM harveycotests WHERE date = '2020-07-19'", &mut conn).await;
+    assert_one_i64(49, "SELECT kdhe_neg_results FROM harveycotests WHERE date = '2020-08-15'", &mut conn).await;
+    assert_one_i64(22, "SELECT kdhe_pos_results FROM harveycotests WHERE date = '2020-08-15'", &mut conn).await;
+    assert_one_i64(32, "SELECT harveyco_neg_results FROM harveycotests WHERE date = '2020-08-15'", &mut conn).await;
+    assert_one_i64(4, "SELECT harveyco_pos_results FROM harveycotests WHERE date = '2020-08-15'", &mut conn).await;
 
     // covidtracking
 
