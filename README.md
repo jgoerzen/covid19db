@@ -155,3 +155,6 @@ Visualizations and text: All our charts, maps, and text is licensed under a very
 
 [source](https://ourworldindata.org/how-to-use-our-world-in-data#how-is-our-work-copyrighted)
 
+## Harvey County Testing Data
+
+This data is a manual import from the Kansas Department of Health and Environment and the Harvey County Health Department.
