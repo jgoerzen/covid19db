@@ -335,7 +335,7 @@ pub async fn initdb<E: Executor>(db: &mut E) -> () {
         sum(positiveTestsAntigen) as positiveTestsAntigen,
         sum(positiveIncrease) as positiveIncrease, sum(negativeIncrease) as negativeIncrease,
         sum(total) as total, sum(totalTestResults) as totalTestResults,
-        sum(totalTestresultsIncrease) as totalTestsResultsIncrease, sum(posNeg) as posNeg,
+        sum(totalTestResultsIncrease) as totalTestResultsIncrease, sum(posNeg) as posNeg,
         sum(deathIncrease) as deathIncrease, sum(hospitalizedIncrease) as hospitalizedIncrease from covidtracking group by(date)"),
         format!("CREATE VIEW owid AS select {} as date, {} as date_year, {} as date_month, {} as date_day,
                  total_cases_per_million / 10.0 AS total_cases_per_100k,
