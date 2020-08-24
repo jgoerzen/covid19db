@@ -116,7 +116,7 @@ pub async fn load() {
     )
     .await;
     assert_one_i64(
-        49,
+        50,
         "SELECT kdhe_neg_results FROM harveycotests WHERE date = '2020-08-15'",
         &mut conn,
     )
