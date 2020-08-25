@@ -145,6 +145,7 @@ pub async fn initdb<E: Executor>(db: &mut E) -> () {
          positiveIncrease integer,
          negativeIncrease integer,
          total integer,
+         totalTestResultsSource text not null,
          totalTestResults integer,
          totalTestResultsIncrease integer,
          posNeg integer,
