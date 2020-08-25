@@ -30,7 +30,7 @@ use crate::dbutil::*;
 mod combinedloader;
 mod combinedlocloader;
 mod covidtrackingloader;
-mod harveycotestsloader;
+mod harveycodataloader;
 mod loclookuploader;
 mod owidloader;
 mod parseutil;
@@ -77,68 +77,73 @@ pub async fn load() {
 
     // Harvey County
     //
-    // https://github.com/jgoerzen/covid19-data/raw/master/harveycotests.csv
-    let path = tmp_path.join("harveycotests.csv");
+    // https://github.com/jgoerzen/covid19-data/raw/master/harveycodata.csv
+    let path = tmp_path.join("harveycodata.csv");
     let mut file = stdoptions.open(&path).unwrap();
     println!("Downloading {:#?}", path);
     downloadto(
-        "https://github.com/jgoerzen/covid19-data/raw/master/harveycotests.csv",
+        "https://github.com/jgoerzen/covid19-data/raw/master/harveycodata.csv",
         &mut file,
     )
     .await;
     file.seek(SeekFrom::Start(0)).unwrap();
     println!("Processing {:#?}", path);
     let mut rdr = parseutil::parse_init_file(file).expect("Couldn't init parser");
-    harveycotestsloader::load(&mut rdr, outputpool.begin().await.unwrap()).await;
+    harveycodataloader::load(&mut rdr, outputpool.begin().await.unwrap()).await;
     let mut conn = outputpool.acquire().await.unwrap();
     assert_one_opti64(
         Some(51),
-        "SELECT kdhe_neg_results FROM harveycotests WHERE date = '2020-07-19'",
+        "SELECT kdhe_neg_results FROM harveycodata WHERE date = '2020-07-19'",
         &mut conn,
     )
     .await;
     assert_one_opti64(
         Some(1),
-        "SELECT kdhe_pos_results FROM harveycotests WHERE date = '2020-07-19'",
+        "SELECT kdhe_pos_results FROM harveycodata WHERE date = '2020-07-19'",
         &mut conn,
     )
     .await;
     assert_one_opti64(
         None,
-        "SELECT harveyco_neg_results FROM harveycotests WHERE date = '2020-07-19'",
+        "SELECT harveyco_neg_results FROM harveycodata WHERE date = '2020-07-19'",
         &mut conn,
     )
     .await;
     assert_one_opti64(
         None,
-        "SELECT harveyco_pos_results FROM harveycotests WHERE date = '2020-07-19'",
+        "SELECT harveyco_pos_results FROM harveycodata WHERE date = '2020-07-19'",
         &mut conn,
     )
     .await;
     assert_one_i64(
         50,
-        "SELECT kdhe_neg_results FROM harveycotests WHERE date = '2020-08-15'",
+        "SELECT kdhe_neg_results FROM harveycodata WHERE date = '2020-08-15'",
         &mut conn,
     )
     .await;
     assert_one_i64(
         22,
-        "SELECT kdhe_pos_results FROM harveycotests WHERE date = '2020-08-15'",
+        "SELECT kdhe_pos_results FROM harveycodata WHERE date = '2020-08-15'",
         &mut conn,
     )
     .await;
     assert_one_i64(
         32,
-        "SELECT harveyco_neg_results FROM harveycotests WHERE date = '2020-08-15'",
+        "SELECT harveyco_neg_results FROM harveycodata WHERE date = '2020-08-15'",
         &mut conn,
     )
     .await;
     assert_one_i64(
         4,
-        "SELECT harveyco_pos_results FROM harveycotests WHERE date = '2020-08-15'",
+        "SELECT harveyco_pos_results FROM harveycodata WHERE date = '2020-08-15'",
         &mut conn,
     )
     .await;
+    assert_one_i64(
+        20,
+        "SELECT harveyco_recovered FROM harveycodata WHERE date = '2020-06-30'",
+        &mut conn,
+    ).await;
     drop(conn);
 
     // covidtracking
@@ -238,7 +243,7 @@ pub async fn load() {
         ("covidtracking", 9000),
         ("loc_lookup", 4000),
         ("rtlive", 8000),
-        ("harveycotests", 80),
+        ("harveycodata", 80),
     ] {
         let rows: (i64,) = sqlx::query_as(format!("SELECT COUNT(*) FROM {}", tablename).as_str())
             .fetch_one(&mut conn)

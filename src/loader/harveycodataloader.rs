@@ -31,6 +31,7 @@ pub struct HarveyCountyRecord {
     pub kdhe_pos_results: Option<i64>,
     pub harveyco_neg_results: Option<i64>,
     pub harveyco_pos_results: Option<i64>,
+    pub harveyco_recovered: Option<i64>,
 }
 
 impl HarveyCountyRecord {
@@ -43,10 +44,11 @@ impl HarveyCountyRecord {
             .bind(self.kdhe_pos_results)
             .bind(self.harveyco_neg_results)
             .bind(self.harveyco_pos_results)
+            .bind(self.harveyco_recovered)
     }
 
     pub fn insert_str() -> &'static str {
-        "INSERT INTO harveycotests_raw VALUES (?, ?, ?, ?, ?)"
+        "INSERT INTO harveycodata_raw VALUES (?, ?, ?, ?, ?, ?)"
     }
 }
 
@@ -69,6 +71,7 @@ pub async fn load<'a, A: std::io::Read>(
             "kdhe_pos_results",
             "harveyco_neg_results",
             "harveyco_pos_results",
+            "harveyco_recovered",
         ],
         rdr.headers().unwrap().iter().collect::<Vec<&str>>()
     );
