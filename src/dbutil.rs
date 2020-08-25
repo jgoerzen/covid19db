@@ -17,7 +17,6 @@ Copyright (c) 2019-2020 John Goerzen
 */
 
 use sqlx::prelude::*;
-use sqlx::sqlite::SqliteRow;
 
 pub async fn assert_one_i64(
     expected: i64,
