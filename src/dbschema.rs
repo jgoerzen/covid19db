@@ -94,11 +94,12 @@ pub async fn initdb<E: Executor>(db: &mut E) -> () {
         // Harvey County data
         "create table harveycodata_raw(
          date_julian integer not null primary key,
-         kdhe_neg_results,
-         kdhe_pos_results,
-         harveyco_neg_results,
-         harveyco_pos_results,
-         harveyco_recovered)",
+         kdhe_neg_results integer,
+         kdhe_pos_results integer,
+         harveyco_neg_results integer,
+         harveyco_pos_results integer,
+         harveyco_confirmed integer,
+         harveyco_recovered integer)",
         //
         // From https://covidtracking.com/api/v1/states/daily.csv
         //
