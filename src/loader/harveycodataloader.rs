@@ -29,7 +29,7 @@ pub struct HarveyCountyRecord {
     pub date: String,
     pub kdhe_neg_results: Option<i64>,
     pub kdhe_pos_results: Option<i64>,
-    pub harveyco_neg_results: Option<i64>,
+    pub harveyco_tot_results: Option<i64>,
     pub harveyco_pos_results: Option<i64>,
     pub harveyco_confirmed: Option<i64>,
     pub harveyco_recovered: Option<i64>,
@@ -43,7 +43,7 @@ impl HarveyCountyRecord {
             ))
             .bind(self.kdhe_neg_results)
             .bind(self.kdhe_pos_results)
-            .bind(self.harveyco_neg_results)
+            .bind(self.harveyco_tot_results)
             .bind(self.harveyco_pos_results)
             .bind(self.harveyco_confirmed)
             .bind(self.harveyco_recovered)
@@ -71,7 +71,7 @@ pub async fn load<'a, A: std::io::Read>(
             "date",
             "kdhe_neg_results",
             "kdhe_pos_results",
-            "harveyco_neg_results",
+            "harveyco_tot_results",
             "harveyco_pos_results",
             "harveyco_confirmed",
             "harveyco_recovered",
