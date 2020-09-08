@@ -122,7 +122,7 @@ pub async fn load() {
     )
     .await;
     assert_one_i64(
-        22,
+        21,
         "SELECT kdhe_pos_results FROM harveycodata WHERE date = '2020-08-15'",
         &mut conn,
     )
