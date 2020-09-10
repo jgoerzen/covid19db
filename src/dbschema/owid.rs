@@ -65,6 +65,7 @@ pub struct OWID {
     pub handwashing_facilities: Option<f64>,
     pub hospital_beds_per_thousand: Option<f64>,
     pub life_expectancy: Option<f64>,
+    pub human_development_index: Option<f64>,
 }
 
 impl OWID {
@@ -113,11 +114,12 @@ impl OWID {
             .bind(self.handwashing_facilities)
             .bind(self.hospital_beds_per_thousand)
             .bind(self.life_expectancy)
+            .bind(self.human_development_index)
     }
 
     /// Gets an INSERT INTO string representing all the values in the table.
     pub fn insert_str() -> &'static str {
-        "INSERT INTO owid_raw VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+        "INSERT INTO owid_raw VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
     }
 
     /// Sets all date fields in the struct to appropriate representations of the

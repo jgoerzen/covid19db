@@ -66,6 +66,7 @@ pub struct OWIDRecord {
     pub handwashing_facilities: Option<f64>,
     pub hospital_beds_per_thousand: Option<f64>,
     pub life_expectancy: Option<f64>,
+    pub human_development_index: Option<f64>,
 }
 
 pub fn parse_to_final<A: Iterator<Item = csv::StringRecord>>(
@@ -121,7 +122,8 @@ pub async fn load<'a, A: std::io::Read>(
             "male_smokers",
             "handwashing_facilities",
             "hospital_beds_per_thousand",
-            "life_expectancy"
+            "life_expectancy",
+            "human_development_index"
         ],
         rdr.headers().unwrap().iter().collect::<Vec<&str>>()
     );
@@ -170,6 +172,7 @@ pub async fn load<'a, A: std::io::Read>(
             handwashing_facilities: rec.handwashing_facilities,
             hospital_beds_per_thousand: rec.hospital_beds_per_thousand,
             life_expectancy: rec.life_expectancy,
+            human_development_index: rec.human_development_index,
         };
         let query = sqlx::query(OWID::insert_str());
         dbrec

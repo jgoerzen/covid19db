@@ -143,12 +143,14 @@ pub async fn load() {
         20,
         "SELECT harveyco_recovered FROM harveycodata WHERE date = '2020-06-30'",
         &mut conn,
-    ).await;
+    )
+    .await;
     assert_one_i64(
         41,
         "SELECT harveyco_confirmed FROM harveycodata WHERE date = '2020-06-30'",
         &mut conn,
-    ).await;
+    )
+    .await;
     drop(conn);
 
     // covidtracking
