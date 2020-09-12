@@ -92,7 +92,7 @@ pub async fn load() {
     harveycodataloader::load(&mut rdr, outputpool.begin().await.unwrap()).await;
     let mut conn = outputpool.acquire().await.unwrap();
     assert_one_opti64(
-        Some(51),
+        Some(52),
         "SELECT kdhe_neg_results FROM harveycodata WHERE date = '2020-07-19'",
         &mut conn,
     )
