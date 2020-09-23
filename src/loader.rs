@@ -51,7 +51,11 @@ pub async fn load() {
     let tmp_dir = tempdir().unwrap();
     let tmp_path = tmp_dir.path().to_owned();
     let mut stdoptions = &mut OpenOptions::new();
-    stdoptions = stdoptions.read(true).write(true).create_new(true);
+    stdoptions = stdoptions
+        .read(true)
+        .write(true)
+        .create(true)
+        .truncate(true);
 
     // OUTPUT DB INIT
 
@@ -203,7 +207,7 @@ pub async fn load() {
     let loc_path = tmp_path.join("locations-diff.tsv");
     let mut loc_file = stdoptions.open(&loc_path).unwrap();
     println!("Downloading {:#?}", loc_path);
-    downloadto("https://github.com/cipriancraciun/covid19-datasets/raw/master/exports/combined/v1/locations-diff.tsv",
+    downloadto("https://github.com/cipriancraciun/covid19-datasets/raw/5444d3e19eb2556a93e4d9ac4974762d9489fc1b/exports/combined/v1/locations-diff.tsv",
                &mut loc_file).await;
     loc_file.seek(SeekFrom::Start(0)).unwrap();
     println!("Processing {:#?}", loc_path);
@@ -212,25 +216,38 @@ pub async fn load() {
         combinedlocloader::load(outputpool.begin().await.unwrap(), &fipshm, &mut rdr).await;
 
     // Sqlite Combined
-
+    let sources = vec!["https://github.com/cipriancraciun/covid19-datasets/raw/master/exports/ecdc/v1/worldwide/values-sqlite.db",
+                       "https://github.com/cipriancraciun/covid19-datasets/raw/master/exports/jhu/v1/daily/values-sqlite.db.gz",
+                       "https://github.com/cipriancraciun/covid19-datasets/raw/master/exports/jhu/v1/series/values-sqlite.db.gz",
+                       "https://github.com/cipriancraciun/covid19-datasets/raw/master/exports/nytimes/v1/us-counties/values-sqlite.db.gz",
+                       "https://github.com/cipriancraciun/covid19-datasets/raw/master/exports/nytimes/v1/us-states/values-sqlite.db.gz"];
     let combined_path = tmp_path.join("values-sqlite.db");
-    let combined_file = stdoptions.open(&combined_path).unwrap();
-    println!("Downloading and decompressing {:#?}", combined_path);
-    let mut gzdecoder = GzDecoder::new(combined_file);
-    downloadto("https://github.com/cipriancraciun/covid19-datasets/raw/master/exports/combined/v1/values-sqlite.db.gz",
-               &mut gzdecoder).await;
-    drop(gzdecoder);
-    println!(
-        "Processing {:#?}...  This one will take a little while...",
-        combined_path
-    );
+    for source in sources {
+        let mut combined_file = stdoptions.open(&combined_path).unwrap();
+        if source.ends_with(".gz") {
+            println!(
+                "Downloading and decompressing {:#?} to {:#?}",
+                source, combined_path
+            );
+            let mut gzdecoder = GzDecoder::new(combined_file);
+            downloadto(source, &mut gzdecoder).await;
+            drop(gzdecoder);
+        } else {
+            println!("Downloading {:#?} to {:#?}", source, combined_path);
+            downloadto(source, &mut combined_file).await;
+            drop(combined_file);
+        }
+        println!("Processing {:#}...", source);
 
-    let mut inputpool = SqlitePool::builder()
-        .max_size(5)
-        .build(format!("sqlite::{}", combined_path.to_str().unwrap()).as_ref())
-        .await
-        .expect("Error building");
-    combinedloader::load(&mut inputpool, &mut outputpool, &mut lochm, &fipshm).await;
+        let mut inputpool = SqlitePool::builder()
+            .max_size(5)
+            .build(format!("sqlite::{}", combined_path.to_str().unwrap()).as_ref())
+            .await
+            .expect("Error building");
+        combinedloader::load(&mut inputpool, &mut outputpool, &mut lochm, &fipshm).await;
+        std::fs::remove_file(&combined_path).unwrap();
+        inputpool.close().await;
+    }
 
     // Started getting errors at VACUUM about statements in progress.  Drop and re-connect.
     outputpool.close().await;

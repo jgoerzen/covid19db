@@ -36,12 +36,13 @@ fn set_per_pop(
     colname: &str,
     population: Option<i64>,
 ) -> Option<f64> {
-    match row.get::<Option<f64>, &str>(format!("{}_pop100k_{}", colprefix, colname).as_str()) {
-        Some(x) => Some(x),
-        None => match population {
+    match row.try_get::<Option<f64>, &str>(format!("{}_pop100k_{}", colprefix, colname).as_str()) {
+        Ok(Some(x)) => Some(x),
+        _ => match population {
             None => None,
             Some(pop) => Some(
-                (row.get::<i64, &str>(format!("{}_{}", colprefix, colname).as_str()) as f64)
+                (row.try_get::<i64, &str>(format!("{}_{}", colprefix, colname).as_str())
+                    .unwrap_or(0) as f64)
                     * 100000.0
                     / (pop as f64),
             ),
@@ -176,11 +177,13 @@ pub async fn load(
                             .unwrap_or(emptystr.clone()),
                     )
                     .bind(
-                        row.get::<Option<String>, &str>("province")
+                        row.try_get::<Option<String>, &str>("province")
+                            .unwrap_or(None)
                             .unwrap_or(emptystr.clone()),
                     )
                     .bind(
-                        row.get::<Option<String>, &str>("administrative")
+                        row.try_get::<Option<String>, &str>("administrative")
+                            .unwrap_or(None)
                             .unwrap_or(emptystr.clone()),
                     )
                     .bind(
@@ -240,7 +243,8 @@ pub async fn load(
                 .unwrap_or(0),
             absolute_deaths: row.get::<Option<i64>, &str>("absolute_deaths").unwrap_or(0),
             absolute_recovered: row
-                .get::<Option<i64>, &str>("absolute_recovered")
+                .try_get::<Option<i64>, &str>("absolute_recovered")
+                .unwrap_or(None)
                 .unwrap_or(0),
             absolute_infected: row
                 .get::<Option<i64>, &str>("absolute_infected")
@@ -250,15 +254,18 @@ pub async fn load(
             absolute_pop100k_recovered: set_per_pop(&row, "absolute", "recovered", population),
             absolute_pop100k_infected: set_per_pop(&row, "absolute", "infected", population),
             relative_deaths: row.get("relative_deaths"),
-            relative_recovered: row.get("relative_recovered"),
+            relative_recovered: row.try_get("relative_recovered").unwrap_or(None),
             relative_infected: row.get("relative_infected"),
             delta_confirmed: row.get::<Option<i64>, &str>("delta_confirmed").unwrap_or(0),
             delta_deaths: row.get::<Option<i64>, &str>("delta_deaths").unwrap_or(0),
-            delta_recovered: row.get::<Option<i64>, &str>("delta_recovered").unwrap_or(0),
+            delta_recovered: row
+                .try_get::<Option<i64>, &str>("delta_recovered")
+                .unwrap_or(None)
+                .unwrap_or(0),
             delta_infected: row.get::<Option<i64>, &str>("delta_infected").unwrap_or(0),
             delta_pct_confirmed: row.get("delta_pct_confirmed"),
             delta_pct_deaths: row.get("delta_pct_deaths"),
-            delta_pct_recovered: row.get("delta_pct_recovered"),
+            delta_pct_recovered: row.try_get("delta_pct_recovered").unwrap_or(None),
             delta_pct_infected: row.get("delta_pct_infected"),
             delta_pop100k_confirmed: set_per_pop(&row, "delta", "confirmed", population),
             delta_pop100k_deaths: set_per_pop(&row, "delta", "deaths", population),
@@ -266,7 +273,7 @@ pub async fn load(
             delta_pop100k_infected: set_per_pop(&row, "delta", "infected", population),
             peak_pct_confirmed: row.get("peak_pct_confirmed"),
             peak_pct_deaths: row.get("peak_pct_deaths"),
-            peak_pct_recovered: row.get("peak_pct_recovered"),
+            peak_pct_recovered: row.try_get("peak_pct_recovered").unwrap_or(None),
             peak_pct_infected: row.get("peak_pct_infected"),
             factbook_area: row.get("factbook_area"),
             factbook_population: population,
