@@ -276,5 +276,7 @@ pub async fn load() {
         println!("{}: {}", tablename, rows.0);
         assert!(rows.0 >= minrows);
     }
+    drop(conn);
+    outputpool.close().await;
     println!("Finished successfully!");
 }
