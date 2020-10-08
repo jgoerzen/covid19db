@@ -29,6 +29,7 @@ pub struct CovidTracking {
     pub date_julian: i32,
     pub state: String,
     pub positive: Option<i64>,
+    pub probableCases: Option<i64>,
     pub negative: Option<i64>,
     pub pending: Option<i64>,
     pub hospitalizedCurrently: Option<i64>,
@@ -90,6 +91,7 @@ impl CovidTracking {
             .bind(self.date_julian)
             .bind(self.state)
             .bind(self.positive)
+            .bind(self.probableCases)
             .bind(self.negative)
             .bind(self.pending)
             .bind(self.hospitalizedCurrently)
@@ -144,7 +146,7 @@ impl CovidTracking {
 
     /// Gets an INSERT INTO string representing all the values in the table.
     pub fn insert_str() -> &'static str {
-        "INSERT INTO covidtracking_raw VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+        "INSERT INTO covidtracking_raw VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
     }
 
     /// Sets all date fields in the struct to appropriate representations of the

@@ -107,6 +107,7 @@ pub async fn initdb<E: Executor>(db: &mut E) -> () {
          date_julian integer not null,
          state text not null,
          positive integer,
+         probableCases integer,
          negative integer,
          pending integer,
          hospitalizedCurrently integer,
