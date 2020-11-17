@@ -248,6 +248,7 @@ pub async fn initdb<E: Executor>(db: &mut E) -> () {
         total_deaths_per_million real,
         new_deaths_per_million real,
          new_deaths_smoothed_per_million real,
+        reproduction_rate real,
         icu_patients real,
         icu_patients_per_million real,
         hosp_patients real,
