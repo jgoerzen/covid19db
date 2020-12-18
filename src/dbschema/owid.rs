@@ -59,6 +59,8 @@ pub struct OWID {
     pub tests_per_case: Option<f64>,
     pub positive_rate: Option<f64>,
     pub tests_units: Option<String>,
+    pub total_vaccinations: Option<f64>,
+    pub total_vaccinations_per_hundred: Option<f64>,
     pub stringency_index: Option<f64>,
     pub population: Option<f64>,
     pub population_density: Option<f64>,
@@ -117,6 +119,8 @@ impl OWID {
             .bind(self.tests_per_case)
             .bind(self.positive_rate)
             .bind(self.tests_units)
+            .bind(self.total_vaccinations)
+            .bind(self.total_vaccinations_per_hundred)
             .bind(self.stringency_index)
             .bind(self.population)
             .bind(self.population_density)
@@ -137,7 +141,7 @@ impl OWID {
 
     /// Gets an INSERT INTO string representing all the values in the table.
     pub fn insert_str() -> &'static str {
-        "INSERT INTO owid_raw VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+        "INSERT INTO owid_raw VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
     }
 
     /// Sets all date fields in the struct to appropriate representations of the

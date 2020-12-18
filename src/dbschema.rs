@@ -266,6 +266,8 @@ pub async fn initdb<E: Executor>(db: &mut E) -> () {
         tests_per_case real,
         positive_rate real,
         tests_units text,
+        total_vaccinations real,
+        total_vaccinations_per_hundred real,
         stringency_index real,
         population real,
         population_density real,
