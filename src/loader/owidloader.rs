@@ -196,7 +196,7 @@ pub async fn load<'a, A: std::io::Read>(
             tests_units: rec.tests_units,
             total_vaccinations: rec.total_vaccinations,
             new_vaccinations: rec.new_vaccinations,
-            new_vaccinations_smoothed: rec.new_vaccinatoins_smoothed,
+            new_vaccinations_smoothed: rec.new_vaccinations_smoothed,
             total_vaccinations_per_hundred: rec.total_vaccinations_per_hundred,
             new_vaccinations_smoothed_per_million: rec.new_vaccinations_smoothed_per_million,
             stringency_index: rec.stringency_index,
