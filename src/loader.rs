@@ -1,6 +1,6 @@
 /*
 
-Copyright (c) 2019-2020 John Goerzen
+Copyright (c) 2019-2021 John Goerzen
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
