@@ -231,6 +231,7 @@ pub async fn load() {
             );
             let mut decoder = Decoder::new(combined_file).unwrap();
             downloadto(source, &mut decoder).await;
+            decoder.flush().unwrap();
             drop(decoder);
         } else {
             println!("Downloading {:#?} to {:#?}", source, combined_path);
