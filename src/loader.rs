@@ -16,7 +16,7 @@ Copyright (c) 2019-2020 John Goerzen
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-use flate2::write::GzDecoder;
+use zstd::stream::write::Decoder;
 use reqwest;
 use sqlx::prelude::*;
 use sqlx::sqlite::SqlitePool;
@@ -216,22 +216,22 @@ pub async fn load() {
         combinedlocloader::load(outputpool.begin().await.unwrap(), &fipshm, &mut rdr).await;
 
     // Sqlite Combined
-    let sources = vec!["https://github.com/cipriancraciun/covid19-datasets/raw/master/exports/ecdc/v1/worldwide/values-sqlite.db",
-                       "https://github.com/cipriancraciun/covid19-datasets/raw/master/exports/jhu/v1/daily/values-sqlite.db.gz",
-                       "https://github.com/cipriancraciun/covid19-datasets/raw/master/exports/jhu/v1/series/values-sqlite.db.gz",
-                       "https://github.com/cipriancraciun/covid19-datasets/raw/master/exports/nytimes/v1/us-counties/values-sqlite.db.gz",
-                       "https://github.com/cipriancraciun/covid19-datasets/raw/master/exports/nytimes/v1/us-states/values-sqlite.db.gz"];
+    let sources = vec!["https://github.com/cipriancraciun/covid19-datasets/raw/master/exports/ecdc/v1/worldwide/values-sqlite.db.zst",
+                       "https://github.com/cipriancraciun/covid19-datasets/raw/master/exports/jhu/v1/daily/values-sqlite.db.zst",
+                       "https://github.com/cipriancraciun/covid19-datasets/raw/master/exports/jhu/v1/series/values-sqlite.db.zst",
+                       "https://github.com/cipriancraciun/covid19-datasets/raw/master/exports/nytimes/v1/us-counties/values-sqlite.db.zst",
+                       "https://github.com/cipriancraciun/covid19-datasets/raw/master/exports/nytimes/v1/us-states/values-sqlite.db.zst"];
     let combined_path = tmp_path.join("values-sqlite.db");
     for source in sources {
         let mut combined_file = stdoptions.open(&combined_path).unwrap();
-        if source.ends_with(".gz") {
+        if source.ends_with(".zst") {
             println!(
                 "Downloading and decompressing {:#?} to {:#?}",
                 source, combined_path
             );
-            let mut gzdecoder = GzDecoder::new(combined_file);
-            downloadto(source, &mut gzdecoder).await;
-            drop(gzdecoder);
+            let mut decoder = Decoder::new(combined_file).unwrap();
+            downloadto(source, &mut decoder).await;
+            drop(decoder);
         } else {
             println!("Downloading {:#?} to {:#?}", source, combined_path);
             downloadto(source, &mut combined_file).await;

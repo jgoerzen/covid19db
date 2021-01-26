@@ -26,4 +26,5 @@ sqlx = { version = "0.3", default-features = false, features = ["runtime-tokio",
 tokio = { version = "0.2", features = ["macros"] }
 reqwest = { version = "0.10", features = ["socks"] }
 tempfile = "3.1"
-flate2 = "1.0"
+zstd = "0.6"
+
