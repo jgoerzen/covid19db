@@ -90,7 +90,7 @@ pub async fn initdb<E: Executor>(db: &mut E) -> () {
          new_tests integer,
          new_cases integer,
          new_deaths integer)",
-        "create index rtlive_raw_uniq_idx on rtlive_raw (state, date_julian)",
+        "create unique index rtlive_raw_uniq_idx on rtlive_raw (state, date_julian)",
         // Harvey County data
         "create table harveycodata_raw(
          date_julian integer not null primary key,
@@ -100,6 +100,17 @@ pub async fn initdb<E: Executor>(db: &mut E) -> () {
          harveyco_pos_results integer,
          harveyco_confirmed integer,
          harveyco_recovered integer)",
+        //
+        // NY Times - Counties
+        //
+        "create table nytcounties_raw(
+         date_julian integer not null,
+         county text not null,
+         state text not null,
+         fips integer not null,
+         cases integer not null,
+         deaths integer nul null)",
+        "create unique index nytcounties_raw_uniq_idx on nytcounties_raw (state, county, date_julian)",
         //
         // From https://covidtracking.com/api/v1/states/daily.csv
         //
