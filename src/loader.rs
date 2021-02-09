@@ -35,6 +35,7 @@ mod loclookuploader;
 mod owidloader;
 mod parseutil;
 mod rtliveloader;
+mod nytcountiesloader;
 
 pub async fn downloadto<W: Write>(url: &str, file: &mut W) {
     let mut result = reqwest::get(url).await.unwrap();
@@ -78,6 +79,24 @@ pub async fn load() {
     println!("Processing {:#?}", csse_fips_path);
     let mut rdr = parseutil::parse_init_file(csse_fips_file).expect("Couldn't init parser");
     let fipshm = loclookuploader::load(&mut rdr, outputpool.begin().await.unwrap()).await;
+
+    // NY Times Counties
+
+    let path = tmp_path.join("nytcounties.csv");
+    let mut file = stdoptions.open(&path).unwrap();
+    println!("Downloading {:#?}", path);
+    downloadto(
+        "https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv",
+        &mut file,
+    )
+    .await;
+    file.seek(SeekFrom::Start(0)).unwrap();
+    println!("Processing {:#?}", path);
+    let mut rdr = parseutil::parse_init_file(file).expect("Couldn't init parser");
+    nytcountiesloader::load(&mut rdr, outputpool.begin().await.unwrap()).await;
+    //let mut conn = outputpool.acquire().await.unwrap();
+    // tests here
+    // drop(conn);
 
     // Harvey County
     //

@@ -25,38 +25,36 @@ use serde::Deserialize;
 use sqlx::{Query, Transaction};
 
 #[derive(Debug, Deserialize, PartialEq, Clone)]
-pub struct HarveyCountyRecord {
+pub struct NYTCountyRecord {
     pub date: String,
-    pub kdhe_neg_results: Option<i64>,
-    pub kdhe_pos_results: Option<i64>,
-    pub harveyco_tot_results: Option<i64>,
-    pub harveyco_pos_results: Option<i64>,
-    pub harveyco_confirmed: Option<i64>,
-    pub harveyco_recovered: Option<i64>,
+    pub county: String,
+    pub state: String,
+    pub fips: i64,
+    pub cases: i64,
+    pub deaths: i64,
 }
 
-impl HarveyCountyRecord {
+impl NYTCountyRecord {
     pub fn bind_query<'q>(self, query: Query<'q, sqlx::Sqlite>) -> Query<'q, sqlx::Sqlite> {
         query
             .bind(nd_to_day(
                 &NaiveDate::parse_from_str(self.date.as_str(), "%Y-%m-%d").unwrap(),
             ))
-            .bind(self.kdhe_neg_results)
-            .bind(self.kdhe_pos_results)
-            .bind(self.harveyco_tot_results)
-            .bind(self.harveyco_pos_results)
-            .bind(self.harveyco_confirmed)
-            .bind(self.harveyco_recovered)
+            .bind(self.county)
+            .bind(self.state)
+            .bind(self.fips)
+            .bind(self.cases)
+            .bind(self.deaths)
     }
 
     pub fn insert_str() -> &'static str {
-        "INSERT INTO harveycodata_raw VALUES (?, ?, ?, ?, ?, ?, ?)"
+        "INSERT INTO nytcounties_raw VALUES (?, ?, ?, ?, ?, ?)"
     }
 }
 
 pub fn parse_to_final<A: Iterator<Item = csv::StringRecord>>(
     striter: A,
-) -> impl Iterator<Item = HarveyCountyRecord> {
+) -> impl Iterator<Item = NYTCountyRecord> {
     striter.filter_map(|x| rec_to_struct(&x).expect("rec_to_struct"))
 }
 
@@ -69,19 +67,18 @@ pub async fn load<'a, A: std::io::Read>(
     assert_eq!(
         vec![
             "date",
-            "kdhe_neg_results",
-            "kdhe_pos_results",
-            "harveyco_tot_results",
-            "harveyco_pos_results",
-            "harveyco_confirmed",
-            "harveyco_recovered",
+            "county",
+            "state",
+            "fips",
+            "cases",
+            "deaths",
         ],
         rdr.headers().unwrap().iter().collect::<Vec<&str>>()
     );
     let recs = parse_records(rdr.byte_records());
     let finaliter = parse_to_final(recs);
     for rec in finaliter {
-        let query = sqlx::query(HarveyCountyRecord::insert_str());
+        let query = sqlx::query(NYTCountyRecord::insert_str());
         rec.bind_query(query)
             .execute(&mut transaction)
             .await
