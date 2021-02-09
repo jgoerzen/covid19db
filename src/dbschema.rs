@@ -38,7 +38,7 @@ pub async fn initdb<E: Executor>(db: &mut E) -> () {
         "drop table if exists harveycodata_raw",
         "drop table if exists nytcounties_raw",
         "drop index if exists nytcounties_raw_uniq_idx",
-        "drop view if exists nytcounties_raw",
+        "drop view if exists nytcounties",
         "drop view if exists cdataset",
         "drop index if exists loc_lookup_fips",
         "drop table if exists loc_lookup",
@@ -110,9 +110,9 @@ pub async fn initdb<E: Executor>(db: &mut E) -> () {
          date_julian integer not null,
          county text not null,
          state text not null,
-         fips integer not null,
+         fips integer,
          cases integer not null,
-         deaths integer nul null)",
+         deaths integer)",
         "create unique index nytcounties_raw_uniq_idx on nytcounties_raw (state, county, date_julian)",
         //
         // From https://covidtracking.com/api/v1/states/daily.csv
@@ -337,7 +337,8 @@ pub async fn initdb<E: Executor>(db: &mut E) -> () {
         ),
         format!("CREATE VIEW nytcounties AS select {} as date, {} as date_year, {} as date_month, {} as date_day,
                  loc_lookup.population AS population,
-                 nytcounties_raw.* FROM nytcounties_raw, loc_lookup WHERE nytcounties_raw.fips = loc_lookup.fips",
+                 nytcounties_raw.* FROM nytcounties_raw LEFT JOIN loc_lookup ON nytcounties_raw.fips = loc_lookup.fips
+                 WHERE nytcounties_raw.fips IS NOT NULL",
                 querystr_jd_to_datestr("nytcounties_raw.date_julian"),
                 querystr_jd_to_year("nytcounties_raw.date_julian"),
                 querystr_jd_to_month("nytcounties_raw.date_julian"),

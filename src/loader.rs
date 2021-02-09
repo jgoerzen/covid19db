@@ -96,7 +96,7 @@ pub async fn load() {
     nytcountiesloader::load(&mut rdr, outputpool.begin().await.unwrap()).await;
     //let mut conn = outputpool.acquire().await.unwrap();
     // tests here
-    // drop(conn);
+    // drop(conn)
 
     // Harvey County
     //

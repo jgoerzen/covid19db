@@ -29,9 +29,9 @@ pub struct NYTCountyRecord {
     pub date: String,
     pub county: String,
     pub state: String,
-    pub fips: i64,
+    pub fips: Option<i64>,
     pub cases: i64,
-    pub deaths: i64,
+    pub deaths: Option<i64>,
 }
 
 impl NYTCountyRecord {
