@@ -337,6 +337,12 @@ pub async fn initdb<E: Executor>(db: &mut E) -> () {
         ),
         format!("CREATE VIEW nytcounties AS select {} as date, {} as date_year, {} as date_month, {} as date_day,
                  loc_lookup.population AS population,
+                      cases -
+                        (SELECT cases FROM nytcounties_raw AS ntc
+                                WHERE ntc.state = nytcounties_raw.state AND ntc.county = nytcounties_raw.county AND ntc.date_julian = nytcounties_raw.date_julian - 1) AS cases_new,
+                      deaths -
+                        (SELECT deaths FROM nytcounties_raw AS ntc
+                                WHERE ntc.state = nytcounties_raw.state AND ntc.county = nytcounties_raw.county AND ntc.date_julian = nytcounties_raw.date_julian - 1) AS deaths_new,
                  nytcounties_raw.* FROM nytcounties_raw LEFT JOIN loc_lookup ON nytcounties_raw.fips = loc_lookup.fips
                  WHERE nytcounties_raw.fips IS NOT NULL",
                 querystr_jd_to_datestr("nytcounties_raw.date_julian"),

@@ -23,6 +23,8 @@ use chrono::NaiveDate;
 use csv;
 use serde::Deserialize;
 use sqlx::{Query, Transaction};
+use std::io;
+use std::io::Write;
 
 #[derive(Debug, Deserialize, PartialEq, Clone)]
 pub struct NYTCountyRecord {
@@ -77,12 +79,22 @@ pub async fn load<'a, A: std::io::Read>(
     );
     let recs = parse_records(rdr.byte_records());
     let finaliter = parse_to_final(recs);
+    let mut processedrecs: i64 = 0;
     for rec in finaliter {
         let query = sqlx::query(NYTCountyRecord::insert_str());
         rec.bind_query(query)
             .execute(&mut transaction)
             .await
             .unwrap();
+        processedrecs += 1;
+        if processedrecs % 100000 == 0 {
+            print!(
+                "Processed {} records\r",
+                processedrecs,
+            );
+            io::stdout().flush().unwrap();
+        }
     }
+    println!("Processed {} records; now committing...", processedrecs);
     transaction.commit().await.unwrap();
 }
