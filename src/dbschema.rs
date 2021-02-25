@@ -137,6 +137,7 @@ pub async fn initdb<E: Executor>(db: &mut E) -> () {
          checkTimeEt text,
          death integer,
          hospitalized integer,
+         hospitalizedDischarged integer,
          dateChecked text,
          totalTestsViral integer,
          positiveTestsViral integer,
