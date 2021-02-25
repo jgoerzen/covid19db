@@ -108,7 +108,7 @@ impl CovidTracking {
             .bind(self.checkTimeEt)
             .bind(self.death)
             .bind(self.hospitalized)
-            .bind(self.hopsitalizedDischarged)
+            .bind(self.hospitalizedDischarged)
             .bind(self.dateChecked)
             .bind(self.totalTestsViral)
             .bind(self.positiveTestsViral)
