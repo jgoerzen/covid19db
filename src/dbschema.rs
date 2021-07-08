@@ -305,7 +305,8 @@ pub async fn initdb<E: Executor>(db: &mut E) -> () {
         handwashing_facilities real,
         hospital_beds_per_thousand real,
         life_expectancy real,
-        human_development_index
+        human_development_index,
+        excess_mortality
 )",
         "CREATE UNIQUE INDEX owid_raw_uniq_idx ON owid_raw (date_julian, iso_code)",
     ];
